@@ -44,7 +44,7 @@ import static org.lwjgl.opengl.GL11C.GL_FLOAT;
 public class Sprite implements AutoCloseable {
     private static final Gson GSON = new Gson();
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Model model;
     private final Shader shader;
     private final Map<String, ResourceLocation> textureLocations;
@@ -56,7 +56,7 @@ public class Sprite implements AutoCloseable {
         Map<String, String> textures = new LinkedHashMap<>();
     }
 
-    protected Sprite(ResourceLocation id,
+    protected Sprite(Identifier id,
                      Model model,
                      Shader shader,
                      Map<String, ResourceLocation> textureLocations) {
@@ -108,10 +108,11 @@ public class Sprite implements AutoCloseable {
             TextureAnimation.fromTexture(textureLoc).ifPresent(animation -> layerAnimations.put(entry.getKey(), animation));
         }
 
+        Identifier spriteId = extractSpriteIdentifier(spriteConfigLocation);
         if (!layerAnimations.isEmpty()) {
-            return new MetaSprite(spriteConfigLocation, model, shader, textureLocations, layerAnimations);
+            return new MetaSprite(spriteId, model, shader, textureLocations, layerAnimations);
         }
-        return new Sprite(spriteConfigLocation, model, shader, textureLocations);
+        return new Sprite(spriteId, model, shader, textureLocations);
     }
 
     private static Identifier parseModelLocation(ResourceLocation base, String value) {
@@ -184,7 +185,15 @@ public class Sprite implements AutoCloseable {
         return new ResourceLocation(base.namespace(), ResourceType.TEXTURE, value);
     }
 
-    public ResourceLocation id() {
+    private static Identifier extractSpriteIdentifier(ResourceLocation configLocation) {
+        String path = configLocation.path();
+        if (path.endsWith(".json")) {
+            path = path.substring(0, path.length() - 5);
+        }
+        return new Identifier(configLocation.namespace(), path);
+    }
+
+    public Identifier id() {
         return id;
     }
 

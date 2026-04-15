@@ -9,6 +9,9 @@ import static io.github.theflysong.App.LOGGER;
 import io.github.theflysong.client.gl.Window;
 import io.github.theflysong.client.gl.mesh.GLGpuMesh;
 import io.github.theflysong.client.gl.shader.GLShaders;
+import io.github.theflysong.client.gui.ExampleTextureScreen;
+import io.github.theflysong.client.gui.GuiRenderer;
+import io.github.theflysong.client.gui.GuiScreen;
 import io.github.theflysong.client.render.GemRenderer;
 import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
@@ -36,9 +39,13 @@ public final class ClientApp {
     @NonNull
     private Renderer renderer = new Renderer();
     @NonNull
+    private Renderer guiRenderer = new Renderer();
+    @NonNull
     private final MapRenderer mapRenderer = new MapRenderer();
     private GameMap gameMap;
     private @Nullable GLGpuMesh atlasDebugMesh;
+    private @Nullable GuiRenderer gui;
+    private @Nullable GuiScreen guiScreen;
 
     public void run() {
         LOGGER.info("Creating window: {}x{}, title={}", (int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE);
@@ -66,6 +73,7 @@ public final class ClientApp {
 
         gameMap = new GameMap(12, 8);
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
+        setupGui();
         LOGGER.info("Client initialization completed: map={}x{}", gameMap.width(), gameMap.height());
     }
 
@@ -74,8 +82,11 @@ public final class ClientApp {
             return;
         }
         mapRenderer.renderMap(renderer, gameMap);
-        // renderAtlasDebug();
         renderer.flush();
+
+        if (gui != null && guiScreen != null) {
+            gui.renderScreen(guiScreen);
+        }
     }
 
     private void renderAtlasDebug() {
@@ -108,10 +119,23 @@ public final class ClientApp {
             atlasDebugMesh.close();
             atlasDebugMesh = null;
         }
+        if (guiScreen != null) {
+            guiScreen.close();
+            guiScreen = null;
+        }
+        if (gui != null) {
+            gui.close();
+            gui = null;
+        }
         GemRenderer.instance().closeAll();
         Sprites.closeAll();
         Models.closeAll();
         GLShaders.closeAll();
         LOGGER.info("Client cleanup finished");
+    }
+
+    private void setupGui() {
+        gui = new GuiRenderer(guiRenderer);
+        guiScreen = new ExampleTextureScreen();
     }
 }

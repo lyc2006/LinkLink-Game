@@ -1,0 +1,11 @@
+{
+    "vertex": "linklink:shader/texture.vert",
+    "fragment": "linklink:shader/texture.frag",
+    "vertlayout": "linklink:vertexlayout/sprite",
+    "uniforms": {
+        "m4_model": "mat4",
+        "m4_projection": "mat4",
+        "sam_texture": "sampler2D",
+        "uv_rect": "vec4"
+    }
+}

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.github.theflysong.client.gl.shader.Shader;
+import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 
 /**
@@ -13,7 +14,7 @@ import io.github.theflysong.data.ResourceLocation;
 public final class MetaSprite extends Sprite {
     private final Map<String, TextureAnimation> layerAnimations;
 
-    MetaSprite(ResourceLocation id,
+    MetaSprite(Identifier id,
                Model model,
                Shader shader,
                Map<String, ResourceLocation> textureLocations,
