@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
-import io.github.theflysong.client.gl.shader.GLShaders;
 import io.github.theflysong.client.render.preprocessor.IPreprocessor;
 import io.github.theflysong.client.render.preprocessor.SpriteOverlayPreprocessor;
 import io.github.theflysong.client.sprite.Sprite;
@@ -24,29 +23,8 @@ import io.github.theflysong.util.SideOnly;
  * @author theflysong
  * @date 2026年4月16日
  */
+@SideOnly(Side.CLIENT)
 public class GemRenderer {
-    /**
-     * 获取宝石的精灵ID。
-     * 
-     * @return 宝石的精灵ID
-     */
-    @SideOnly(Side.CLIENT)
-    public static Identifier getSprite(@NonNull GemInstance instance) {
-        Identifier this_id = Gems.GEMS.getKey(instance.gem());
-        return new Identifier(this_id.namespace(), "gem." + this_id.path());
-    }
-
-    /**
-     * 获取宝石的渲染预处理器。
-     * 
-     * @param instance 宝石实例
-     * @param sprite   宝石的精灵
-     * @return 宝石的渲染预处理器
-     */
-    @SideOnly(Side.CLIENT)
-    public static IPreprocessor getPreprocessor(@NonNull GemInstance instance, @NonNull Sprite sprite) {
-        return SpriteOverlayPreprocessor.processor(instance.color().color(), sprite);
-    }
 
     @Nullable
     protected static GemRenderer INSTANCE;
@@ -63,11 +41,11 @@ public class GemRenderer {
     public RenderableObject lookupCache(@NonNull GemInstance instance) {
         RenderableObject obj = cache.get(instance);
         if (obj == null) {
-            Sprite sprite = Sprites.SPRITES.getOrThrow(GemRenderer.getSprite(instance));
+            Sprite sprite = Sprites.SPRITES.getOrThrow(instance.gem().getSprite(instance));
             obj = new RenderableObject(
                     sprite.model().createGpuMesh(),
-                    GLShaders.SPRITE_OVERLAY.get(),
-                    SpriteOverlayPreprocessor.processor(instance.color().color(), sprite));
+                    sprite.shader(),
+                    instance.gem().getPreprocessor(instance, sprite));
             cache.put(instance, obj);
         }
         return obj;

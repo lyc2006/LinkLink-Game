@@ -1,0 +1,8 @@
+{
+    "model": "linklink:sprite/gem",
+    "shader": "linklink:shader/sprite_overlay",
+    "textures": {
+        "layer0": "linklink:items/flawless",
+        "overlay": "linklink:items/flawless_overlay"
+    }
+}

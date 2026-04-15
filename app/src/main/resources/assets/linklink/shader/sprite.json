@@ -5,7 +5,8 @@
     "uniforms": {
         "m4_model": "mat4",
         "m4_projection": "mat4",
-        "v4_spriteColor": "vec4",
-        "sam_texture": "sampler2D"
+        "v4_sprite_color": "vec4",
+        "uv_texture": "vec4",
+        "sam_atlas": "sampler2D"
     }
 }

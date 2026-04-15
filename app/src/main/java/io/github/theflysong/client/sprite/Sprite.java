@@ -3,8 +3,11 @@ package io.github.theflysong.client.sprite;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
-import io.github.theflysong.client.data.Texture2D;
+import io.github.theflysong.client.gl.GLTextureAtlas;
 import io.github.theflysong.client.gl.GLTexture2D;
+import io.github.theflysong.client.gl.mesh.GLGpuMesh;
+import io.github.theflysong.client.gl.mesh.GLMeshData;
+import io.github.theflysong.client.gl.mesh.GLVertexAttribute;
 import io.github.theflysong.client.gl.shader.GLShaders;
 import io.github.theflysong.client.gl.shader.Shader;
 import io.github.theflysong.data.Identifier;
@@ -15,12 +18,17 @@ import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import org.lwjgl.system.MemoryUtil;
+
+import static org.lwjgl.opengl.GL11C.GL_FLOAT;
 
 /**
  * Sprite 资源。
@@ -31,13 +39,14 @@ import java.util.Optional;
  * 3. 管理 sprite 自己持有的贴图资源生命周期。
  */
 @SideOnly(Side.CLIENT)
-public final class Sprite implements AutoCloseable {
+public class Sprite implements AutoCloseable {
     private static final Gson GSON = new Gson();
 
     private final ResourceLocation id;
     private final Model model;
     private final Shader shader;
-    private final Map<String, GLTexture2D> textures;
+    private final Map<String, ResourceLocation> textureLocations;
+    private GLTextureAtlas atlas;
 
     private static final class SpriteDefinition {
         String model;
@@ -45,11 +54,14 @@ public final class Sprite implements AutoCloseable {
         Map<String, String> textures = new LinkedHashMap<>();
     }
 
-    private Sprite(ResourceLocation id, Model model, Shader shader, Map<String, GLTexture2D> textures) {
+    protected Sprite(ResourceLocation id,
+                     Model model,
+                     Shader shader,
+                     Map<String, ResourceLocation> textureLocations) {
         this.id = Objects.requireNonNull(id, "id must not be null");
         this.model = Objects.requireNonNull(model, "model must not be null");
         this.shader = Objects.requireNonNull(shader, "shader must not be null");
-        this.textures = Map.copyOf(textures);
+        this.textureLocations = Map.copyOf(textureLocations);
     }
 
     /**
@@ -85,14 +97,18 @@ public final class Sprite implements AutoCloseable {
         Model model = Models.getOrThrow(modelId);
         Shader shader = GLShaders.getOrThrow(shaderId);
 
-        Map<String, GLTexture2D> textures = new LinkedHashMap<>();
+        Map<String, ResourceLocation> textureLocations = new LinkedHashMap<>();
+        Map<String, TextureAnimation> layerAnimations = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : definition.textures.entrySet()) {
             ResourceLocation textureLoc = resolveTextureLocation(spriteConfigLocation, entry.getValue());
-            Texture2D texture = Texture2D.fromImage(ResourceLoader.loadBinary(textureLoc), textureLoc.toString());
-            textures.put(entry.getKey(), new GLTexture2D.Builder(GLTexture2D.Builder.PIXEL_STYLE).build(texture));
+            textureLocations.put(entry.getKey(), textureLoc);
+            TextureAnimation.fromTexture(textureLoc).ifPresent(animation -> layerAnimations.put(entry.getKey(), animation));
         }
 
-        return new Sprite(spriteConfigLocation, model, shader, textures);
+        if (!layerAnimations.isEmpty()) {
+            return new MetaSprite(spriteConfigLocation, model, shader, textureLocations, layerAnimations);
+        }
+        return new Sprite(spriteConfigLocation, model, shader, textureLocations);
     }
 
     private static Identifier parseModelLocation(ResourceLocation base, String value) {
@@ -178,7 +194,101 @@ public final class Sprite implements AutoCloseable {
     }
 
     public Optional<GLTexture2D> texture(String layer) {
-        return Optional.ofNullable(textures.get(layer));
+        if (atlas == null || !textureLocations.containsKey(layer)) {
+            return Optional.empty();
+        }
+        return Optional.of(atlas);
+    }
+
+    public Optional<GLTextureAtlas> textureAtlas() {
+        return Optional.ofNullable(atlas);
+    }
+
+    public Optional<ResourceLocation> textureLocation(String layer) {
+        return Optional.ofNullable(textureLocations.get(layer));
+    }
+
+    public Map<String, ResourceLocation> textureLocations() {
+        return textureLocations;
+    }
+
+    public GLTextureAtlas.UvRect uvByTexturePath(ResourceLocation textureLocation) {
+        if (atlas == null) {
+            return GLTextureAtlas.UvRect.full();
+        }
+        return atlas.uv(textureLocation).orElse(GLTextureAtlas.UvRect.full());
+    }
+
+    public GLTextureAtlas.UvRect uvForLayer(String layer) {
+        ResourceLocation location = textureLocation(layer)
+                .orElseThrow(() -> new IllegalArgumentException("Missing texture layer: " + layer));
+        return uvByTexturePath(location);
+    }
+
+    public GLGpuMesh createGpuMeshForLayer(String layer) {
+        GLTextureAtlas.UvRect uvRect = uvForLayer(layer);
+        GLMeshData remapped = remapMeshUv(model.meshData(), uvRect);
+        GLGpuMesh mesh = new GLGpuMesh();
+        try {
+            mesh.upload(remapped);
+            return mesh;
+        } finally {
+            MemoryUtil.memFree(remapped.vertexBytes());
+            if (remapped.indexBytes() != null) {
+                MemoryUtil.memFree(remapped.indexBytes());
+            }
+        }
+    }
+
+    void setTextureAtlas(GLTextureAtlas atlas) {
+        this.atlas = atlas;
+    }
+
+    private static GLMeshData remapMeshUv(GLMeshData source, GLTextureAtlas.UvRect uvRect) {
+        int stride = source.layout().stride();
+        int uvOffset = findUvOffset(source);
+
+        ByteBuffer srcVertices = source.vertexBytes().duplicate();
+        srcVertices.rewind();
+        ByteBuffer dstVertices = MemoryUtil.memAlloc(srcVertices.remaining());
+        dstVertices.put(srcVertices);
+        dstVertices.flip();
+
+        for (int i = 0; i < source.vertexCount(); i++) {
+            int base = i * stride + uvOffset;
+            float u = dstVertices.getFloat(base);
+            float v = dstVertices.getFloat(base + 4);
+            dstVertices.putFloat(base, uvRect.u() + u * uvRect.width());
+            dstVertices.putFloat(base + 4, uvRect.v() + v * uvRect.height());
+        }
+
+        ByteBuffer dstIndices = null;
+        if (source.indexBytes() != null) {
+            ByteBuffer srcIndices = source.indexBytes().duplicate();
+            srcIndices.rewind();
+            dstIndices = MemoryUtil.memAlloc(srcIndices.remaining());
+            dstIndices.put(srcIndices);
+            dstIndices.flip();
+        }
+
+        return new GLMeshData(
+                source.layout(),
+                dstVertices,
+                dstIndices,
+                source.vertexCount(),
+                source.indexCount(),
+                source.indexType());
+    }
+
+    private static int findUvOffset(GLMeshData meshData) {
+        for (GLVertexAttribute attribute : meshData.layout().attributes()) {
+            if (attribute.location() == 1 &&
+                    attribute.componentCount() == 2 &&
+                    attribute.glType() == GL_FLOAT) {
+                return attribute.offset();
+            }
+        }
+        throw new IllegalStateException("Cannot find uv attribute (location=1, vec2 float) in layout");
     }
 
     public GLTexture2D textureOrThrow(String layer) {
@@ -186,13 +296,26 @@ public final class Sprite implements AutoCloseable {
     }
 
     public Map<String, GLTexture2D> textures() {
-        return textures;
+        if (atlas == null) {
+            return Map.of();
+        }
+        Map<String, GLTexture2D> mapped = new LinkedHashMap<>();
+        for (String layer : textureLocations.keySet()) {
+            mapped.put(layer, atlas);
+        }
+        return Map.copyOf(mapped);
+    }
+
+    public boolean isAnimated() {
+        return false;
+    }
+
+    public int frameIndexAt(double renderTimeSeconds) {
+        return 0;
     }
 
     @Override
     public void close() {
-        for (GLTexture2D texture : textures.values()) {
-            texture.close();
-        }
+        // Sprite 不再持有独立 GLTexture2D，资源释放由 atlas 统一管理。
     }
 }

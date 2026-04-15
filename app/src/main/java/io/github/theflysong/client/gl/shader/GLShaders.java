@@ -27,7 +27,9 @@ public final class GLShaders {
     public static final Registry<Shader> SHADERS = new SimpleRegistry<>();
 
     public static final Deferred<Shader> SPRITE = GLShaders.registerFromConfig("sprite");
+    public static final Deferred<Shader> SPRITE_META = GLShaders.registerFromConfig("sprite_meta");
     public static final Deferred<Shader> SPRITE_OVERLAY = GLShaders.registerFromConfig("sprite_overlay");
+    public static final Deferred<Shader> SPRITE_META_OVERLAY = GLShaders.registerFromConfig("sprite_meta_overlay");
 
     private GLShaders() {
     }

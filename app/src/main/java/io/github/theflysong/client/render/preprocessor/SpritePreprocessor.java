@@ -4,10 +4,9 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
-import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.render.RenderInfo;
+import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.sprite.Sprite;
-import io.github.theflysong.client.gl.GLManager;
 import io.github.theflysong.client.gl.shader.Shader;
 
 /**
@@ -23,12 +22,16 @@ public class SpritePreprocessor {
         Matrix4f projection = info.projectionMatrix();
 
         // 使用材质
-        GLManager.getInstance().activateUnit(0);
+        RenderContext.activateUnit(0);
         sprite.texture("layer0").ifPresent(texture -> texture.bind());
 
         // 精灵基础 uniform
-        shader.getUniform("sam_texture").ifPresent(u -> u.set(0));
-        shader.getUniform("v4_spriteColor").ifPresent(u -> u.set(color));
+        shader.getUniform("sam_atlas").ifPresent(u -> u.set(0));
+        shader.getUniform("uv_texture").ifPresent(u -> {
+            var uv = sprite.uvForLayer("layer0");
+            u.set(uv.u(), uv.v(), uv.width(), uv.height());
+        });
+        shader.getUniform("v4_sprite_color").ifPresent(u -> u.set(color));
         shader.getUniform("m4_model").ifPresent(u -> u.set(model));
         shader.getUniform("m4_projection").ifPresent(u -> u.set(projection));
     }

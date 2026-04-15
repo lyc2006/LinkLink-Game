@@ -1,14 +1,13 @@
 {
     "vertex": "linklink:shader/sprite.vert",
-    "fragment": "linklink:shader/sprite_overlay.frag",
+    "fragment": "linklink:shader/sprite_meta.frag",
     "vertlayout": "linklink:vertexlayout/sprite",
     "uniforms": {
         "m4_model": "mat4",
         "m4_projection": "mat4",
         "v4_sprite_color": "vec4",
         "uv_texture": "vec4",
-        "uv_overlay": "vec4",
         "sam_atlas": "sampler2D",
-        "f_overlay_intensity": "float"
+        "i_frame": "int"
     }
 }

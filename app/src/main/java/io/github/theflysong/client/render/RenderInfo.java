@@ -13,9 +13,13 @@ import org.jspecify.annotations.NonNull;
  */
 public class RenderInfo {
     private Matrix4f projectionMatrix;
+    private long frameIndex;
+    private double renderTimeSeconds;
 
     public RenderInfo(Matrix4f projectionMatrix) {
         this.projectionMatrix = projectionMatrix;
+        this.frameIndex = 0L;
+        this.renderTimeSeconds = 0.0;
     }
 
     public void updateProjection(Matrix4f newProjection) {
@@ -25,5 +29,18 @@ public class RenderInfo {
     public @NonNull Matrix4f projectionMatrix() {
         assert projectionMatrix != null : "Projection matrix must not be null";
         return projectionMatrix;
+    }
+
+    public void beginFrame(long frameIndex, double renderTimeSeconds) {
+        this.frameIndex = frameIndex;
+        this.renderTimeSeconds = renderTimeSeconds;
+    }
+
+    public long frameIndex() {
+        return frameIndex;
+    }
+
+    public double renderTimeSeconds() {
+        return renderTimeSeconds;
     }
 }

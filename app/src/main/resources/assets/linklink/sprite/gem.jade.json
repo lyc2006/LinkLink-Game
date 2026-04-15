@@ -2,7 +2,7 @@
     "model": "linklink:sprite/gem",
     "shader": "linklink:shader/sprite_overlay",
     "textures": {
-        "layer0": "linklink:items/gem3",
-        "overlay": "linklink:items/gem3_overlay"
+        "layer0": "linklink:items/jade",
+        "overlay": "linklink:items/jade_overlay"
     }
 }

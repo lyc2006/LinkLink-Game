@@ -1,7 +1,8 @@
 {
   "animation": {
     "interpolate": false,
-    "frametime": 2,
+    "vframespersecond": 20,
+    "vframetime": 2,
     "frames": [
       {
         "index": 0,

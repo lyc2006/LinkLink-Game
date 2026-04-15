@@ -1,10 +1,13 @@
 package io.github.theflysong.client.sprite;
 
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
+import io.github.theflysong.client.gl.GLTextureAtlas;
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
@@ -20,11 +23,22 @@ import io.github.theflysong.util.registry.SimpleRegistry;
 @SideOnly(Side.CLIENT)
 public final class Sprites {
     public static final Registry<Sprite> SPRITES = new SimpleRegistry<>();
-
+    private static @Nullable GLTextureAtlas TEXTURE_ATLAS;
+    
+    public static final Deferred<Sprite> DIAMOND = registerFromConfig(
+            "gem.diamond");
+    public static final Deferred<Sprite> JADE = registerFromConfig(
+            "gem.jade");
+    public static final Deferred<Sprite> SAPPHIRE = registerFromConfig(
+            "gem.sapphire");
     public static final Deferred<Sprite> CHIPPED_GEM = registerFromConfig(
             "gem.chipped");
-    public static final Deferred<Sprite> GEM3 = registerFromConfig(
-            "gem3");
+    public static final Deferred<Sprite> FLAWED_GEM = registerFromConfig(
+            "gem.flawed");
+    public static final Deferred<Sprite> FLAWLESS_GEM = registerFromConfig(
+            "gem.flawless");
+    public static final Deferred<Sprite> EXQUISITE_GEM = registerFromConfig(
+            "gem.exquisite");
 
     private Sprites() {
     }
@@ -62,6 +76,7 @@ public final class Sprites {
 
     public static void initialize() {
         SPRITES.onInitialization();
+        buildTextureAtlas();
     }
 
     public static Optional<Sprite> get(Identifier spriteId) {
@@ -92,6 +107,34 @@ public final class Sprites {
         for (Identifier spriteId : SPRITES.keys()) {
             SPRITES.get(spriteId)
                     .ifPresent(sprite -> sprite.close());
+        }
+        if (TEXTURE_ATLAS != null) {
+            TEXTURE_ATLAS.close();
+            TEXTURE_ATLAS = null;
+        }
+    }
+
+    public static Optional<GLTextureAtlas> textureAtlas() {
+        return Optional.ofNullable(TEXTURE_ATLAS);
+    }
+
+    private static void buildTextureAtlas() {
+        List<Sprite> sprites = new ArrayList<>();
+        for (Identifier spriteId : SPRITES.keys()) {
+            SPRITES.get(spriteId).ifPresent(sprites::add);
+        }
+        if (sprites.isEmpty()) {
+            return;
+        }
+
+        try {
+            TEXTURE_ATLAS = GLTextureAtlas.buildFromSprites(sprites);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to build texture atlas from sprites", ex);
+        }
+
+        for (Sprite sprite : sprites) {
+            sprite.setTextureAtlas(TEXTURE_ATLAS);
         }
     }
 }

@@ -38,6 +38,8 @@ public class Renderer {
      */
     private final Map<Shader, List<RenderItem>> shaderBuckets = new LinkedHashMap<>();
     private final RenderInfo renderInfo = new RenderInfo(new Matrix4f().identity());
+    private final long renderStartNano = System.nanoTime();
+    private long frameCounter = 0L;
 
     /**
      * 提交一个渲染项到当前帧队列。
@@ -57,28 +59,37 @@ public class Renderer {
      * - 如果希望跨帧保留队列，请改为双缓冲队列或手动控制 clear。
      */
     public void flush() {
+        double elapsedSeconds = (System.nanoTime() - renderStartNano) / 1_000_000_000.0;
+        renderInfo.beginFrame(frameCounter, elapsedSeconds);
+        frameCounter++;
+
         for (Map.Entry<Shader, List<RenderItem>> bucket : shaderBuckets.entrySet()) {
             Shader shader = bucket.getKey();
             shader.bind();
             for (RenderItem item : bucket.getValue()) {
-                // 预处理调用时机：bind 与 uploadUniforms 之间。
                 RenderContext renderContext = new RenderContext(shader, item.modelMatrix(), item);
-                if (item.preprocessor() != null) {
-                    item.preprocessor().preprocess(renderInfo, renderContext);
-                }
+                renderContext.pushModelMatrixStack();
+                try {
+                    // 预处理调用时机：bind 与 uploadUniforms 之间。
+                    if (item.preprocessor() != null) {
+                        item.preprocessor().preprocess(renderInfo, renderContext);
+                    }
 
-                shader.uploadUniforms();
-                GLVertexLayout meshLayout = item.mesh().vertexLayout();
-                if (meshLayout == null) {
-                    throw new IllegalStateException("Mesh vertex layout is null. Ensure mesh.upload(...) is called before submit.");
+                    shader.uploadUniforms();
+                    GLVertexLayout meshLayout = item.mesh().vertexLayout();
+                    if (meshLayout == null) {
+                        throw new IllegalStateException("Mesh vertex layout is null. Ensure mesh.upload(...) is called before submit.");
+                    }
+                    if (!shader.vertexLayout().compatibleWith(meshLayout)) {
+                        throw new IllegalStateException("Vertex layout mismatch. Shader expects " +
+                                                        shader.vertexLayout() +
+                                                        " but mesh provides " +
+                                                        meshLayout);
+                    }
+                    item.mesh().draw();
+                } finally {
+                    renderContext.popModelMatrixStack();
                 }
-                if (!shader.vertexLayout().compatibleWith(meshLayout)) {
-                    throw new IllegalStateException("Vertex layout mismatch. Shader expects " +
-                                                    shader.vertexLayout() +
-                                                    " but mesh provides " +
-                                                    meshLayout);
-                }
-                item.mesh().draw();
             }
         }
         shaderBuckets.clear();

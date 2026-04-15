@@ -1,0 +1,8 @@
+{
+    "model": "linklink:sprite/gem",
+    "shader": "linklink:shader/sprite_meta_overlay",
+    "textures": {
+        "layer0": "linklink:items/exquisite",
+        "overlay": "linklink:items/exquisite_overlay"
+    }
+}

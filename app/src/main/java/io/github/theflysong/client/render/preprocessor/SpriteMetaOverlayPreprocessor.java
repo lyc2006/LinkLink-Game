@@ -8,22 +8,12 @@ import io.github.theflysong.client.render.RenderInfo;
 import io.github.theflysong.client.sprite.Sprite;
 
 /**
- * 
- *
- * @author theflysong
- * @date 2026年4月16日
+ * Meta Overlay Sprite 预处理器：在 Overlay 逻辑之上补充动画帧信息。
  */
-public class SpriteOverlayPreprocessor {
+public class SpriteMetaOverlayPreprocessor {
     public static void preprocess(@NonNull RenderInfo info, @NonNull RenderContext ctx, @NonNull Vector4f color, @NonNull Sprite sprite) {
-        // 先上传 sprite 通用 uniform
-        SpritePreprocessor.preprocess(info, ctx, color, sprite);
-
-        // overlay 专属 uniform（与基础层共用 sam_atlas）
-        ctx.shader().getUniform("uv_overlay").ifPresent(u -> {
-            var uv = sprite.uvForLayer("overlay");
-            u.set(uv.u(), uv.v(), uv.width(), uv.height());
-        });
-        ctx.shader().getUniform("f_overlay_intensity").ifPresent(u -> u.set(0.7f));
+        SpriteOverlayPreprocessor.preprocess(info, ctx, color, sprite);
+        ctx.shader().getUniform("i_frame").ifPresent(u -> u.set(sprite.frameIndexAt(info.renderTimeSeconds())));
     }
 
     public static IPreprocessor processor(@NonNull Vector4f color, @NonNull Sprite sprite) {

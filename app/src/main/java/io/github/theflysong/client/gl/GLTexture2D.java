@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
 
 import io.github.theflysong.client.data.Texture2D;
+import io.github.theflysong.client.render.RenderContext;
 
 /**
  * 2D 纹理对象封装。
@@ -25,7 +26,7 @@ public class GLTexture2D implements AutoCloseable {
     private final int glId;
     private final Map<Integer, Integer> params;
 
-    private GLTexture2D(Texture2D texture, Map<Integer, Integer> params) {
+    protected GLTexture2D(Texture2D texture, Map<Integer, Integer> params) {
         this.width = texture.width();
         this.height = texture.height();
         this.data = texture.data();
@@ -39,8 +40,8 @@ public class GLTexture2D implements AutoCloseable {
      * 创建 GL 纹理并上传像素数据。
      */
     private void build() {
-        GLManager.getInstance().pushTextureBindingStack();
-        GLManager.getInstance().binding(0, glId);
+        RenderContext.pushTextureBindingStack();
+        RenderContext.binding(0, glId);
 
         for (var entry : params.entrySet()) {
             glTexParameteri(GL_TEXTURE_2D, entry.getKey(), entry.getValue());
@@ -49,15 +50,15 @@ public class GLTexture2D implements AutoCloseable {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
                 width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-        GLManager.getInstance().popTextureBindingStack();
+        RenderContext.popTextureBindingStack();
     }
 
     public void bind() {
-        GLManager.getInstance().bindTexture(glId);
+        RenderContext.bindTexture(glId);
     }
 
     public void unbind() {
-        GLManager.getInstance().bindTexture(0);
+        RenderContext.bindTexture(0);
     }
 
     public int glId() {
