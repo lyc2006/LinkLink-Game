@@ -3,6 +3,8 @@ package io.github.theflysong.client.gl.shader;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
@@ -45,7 +47,16 @@ public final class GLShaders {
      * 便捷注册：由 shader 配置文件创建 Shader。
      */
     public static Deferred<Shader> registerFromConfig(Identifier shaderId, ResourceLocation configLocation) {
-        return register(shaderId, () -> Shader.fromConfig(configLocation));
+        return register(shaderId, () -> {
+            @Nullable Shader shader = null;
+            try {
+                shader = Shader.fromConfig(configLocation);
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to load shader from config: " + configLocation, ex);
+            } finally {
+            }
+            return shader;
+        });
     }
 
     /**

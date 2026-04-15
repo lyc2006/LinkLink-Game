@@ -11,12 +11,13 @@ import io.github.theflysong.client.gl.mesh.GLVertexLayouts;
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLoader;
 import io.github.theflysong.data.ResourceLocation;
-import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ import static org.lwjgl.opengl.GL11C.GL_UNSIGNED_INT;
  */
 @SideOnly(Side.CLIENT)
 public final class Model implements AutoCloseable {
+    @NonNull
     private static final Gson GSON = new Gson();
 
     private final ResourceLocation id;
@@ -67,17 +69,16 @@ public final class Model implements AutoCloseable {
      * - vertices 需要提供 position[2] 和 uv[2]
      * - indices 需要提供三角形索引列表
      */
-    public static Model fromConfig(ResourceLocation modelConfigLocation) {
+    public static Model fromConfig(ResourceLocation modelConfigLocation) throws IOException, IllegalArgumentException {
         String json = ResourceLoader.loadText(modelConfigLocation);
+
         ModelDefinition definition;
         try {
             definition = GSON.fromJson(json, ModelDefinition.class);
         } catch (JsonParseException ex) {
             throw new IllegalArgumentException("Invalid model config json: " + modelConfigLocation, ex);
         }
-        if (definition == null) {
-            throw new IllegalArgumentException("Model config is empty: " + modelConfigLocation);
-        }
+
         if (definition.type == null || definition.type.isBlank()) {
             throw new IllegalArgumentException("Missing 'type' in model config: " + modelConfigLocation);
         }
@@ -108,8 +109,8 @@ public final class Model implements AutoCloseable {
     }
 
     private static GLMeshData buildMeshData(GLVertexLayout layout,
-                                            List<VertexDefinition> vertices,
-                                            List<List<Integer>> indices) {
+            List<VertexDefinition> vertices,
+            List<List<Integer>> indices) {
         ByteBuffer vertexBytes = MemoryUtil.memAlloc(vertices.size() * layout.stride());
         for (VertexDefinition vertex : vertices) {
             requireSize(vertex.position, 2, "position");

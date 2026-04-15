@@ -1,12 +1,9 @@
 package io.github.theflysong.util.registry;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-
-import org.jspecify.annotations.NonNull;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

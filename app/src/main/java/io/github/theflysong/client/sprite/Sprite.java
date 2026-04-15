@@ -14,6 +14,7 @@ import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +60,8 @@ public final class Sprite implements AutoCloseable {
      * - shader 引用会被解析成 linklink:shader/<name>
      * - texture 引用支持若干回退规则，以适配当前资源命名
      */
-    public static Sprite fromConfig(ResourceLocation spriteConfigLocation) {
+    public static Sprite fromConfig(ResourceLocation spriteConfigLocation)
+            throws IOException, IllegalArgumentException {
         String json = ResourceLoader.loadText(spriteConfigLocation);
         SpriteDefinition definition;
         try {
@@ -67,9 +69,7 @@ public final class Sprite implements AutoCloseable {
         } catch (JsonParseException ex) {
             throw new IllegalArgumentException("Invalid sprite config json: " + spriteConfigLocation, ex);
         }
-        if (definition == null) {
-            throw new IllegalArgumentException("Sprite config is empty: " + spriteConfigLocation);
-        }
+    
         if (definition.model == null || definition.model.isBlank()) {
             throw new IllegalArgumentException("Missing 'model' in sprite config: " + spriteConfigLocation);
         }

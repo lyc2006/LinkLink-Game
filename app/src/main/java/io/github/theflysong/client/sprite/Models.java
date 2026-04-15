@@ -3,6 +3,8 @@ package io.github.theflysong.client.sprite;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
@@ -33,11 +35,22 @@ public final class Models {
     }
 
     public static Deferred<Model> registerFromConfig(Identifier modelId, ResourceLocation configLocation) {
-        return register(modelId, () -> Model.fromConfig(configLocation));
+        return register(modelId, () -> {
+            @Nullable
+            Model model = null;
+            try {
+                model = Model.fromConfig(configLocation);
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to load model from config: " + configLocation, ex);
+            } finally {
+            }
+            return model;
+        });
     }
 
     public static Deferred<Model> registerFromConfig(Identifier modelId) {
-        return registerFromConfig(modelId, new ResourceLocation("linklink", ResourceType.MODEL, modelId.path() + ".json"));
+        return registerFromConfig(modelId,
+                new ResourceLocation("linklink", ResourceType.MODEL, modelId.path() + ".json"));
     }
 
     public static Deferred<Model> registerFromConfig(String modelId) {

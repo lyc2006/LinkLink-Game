@@ -1,7 +1,5 @@
 package io.github.theflysong.client.gl.mesh;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -13,9 +11,6 @@ import io.github.theflysong.util.registry.Registry;
 import io.github.theflysong.util.registry.SimpleRegistry;
 
 import static org.lwjgl.opengl.GL11C.GL_FLOAT;
-import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30C.glVertexAttribIPointer;
 
 /**
  * 顶点布局描述（无流版本）。

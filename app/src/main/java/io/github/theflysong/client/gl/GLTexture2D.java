@@ -3,16 +3,11 @@ package io.github.theflysong.client.gl;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.IntConsumer;
 
 import org.jspecify.annotations.Nullable;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.*;
-import static org.lwjgl.opengl.GL30C.*;
-import org.lwjgl.opengl.GL30C;
 
 import io.github.theflysong.client.data.Texture2D;
 

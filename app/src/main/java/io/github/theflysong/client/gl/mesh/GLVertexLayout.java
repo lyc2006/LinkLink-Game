@@ -4,15 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.theflysong.data.ResourceLocation;
-import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
-import io.github.theflysong.util.registry.Deferred;
-import io.github.theflysong.util.registry.Registry;
-import io.github.theflysong.util.registry.SimpleRegistry;
 
-import static org.lwjgl.opengl.GL11C.GL_FLOAT;
 import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30C.glVertexAttribIPointer;

@@ -3,6 +3,8 @@ package io.github.theflysong.client.sprite;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
@@ -36,7 +38,17 @@ public final class Sprites {
     }
 
     public static Deferred<Sprite> registerFromConfig(Identifier spriteId, ResourceLocation configLocation) {
-        return register(spriteId, () -> Sprite.fromConfig(configLocation));
+        return register(spriteId, () -> {
+            @Nullable
+            Sprite sprite = null;
+            try {
+                sprite = Sprite.fromConfig(configLocation);
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to load sprite from config: " + configLocation, ex);
+            } finally {
+            }
+            return sprite;
+        });
     }
 
     public static Deferred<Sprite> registerFromConfig(Identifier spriteId) {

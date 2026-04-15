@@ -44,6 +44,7 @@ public final class Deferred<V> implements Supplier<V> {
     }
 
     @Override
+    @NonNull
     public V get() {
         if (!initialized) {
             throw new IllegalStateException("Deferred value is not initialized yet");

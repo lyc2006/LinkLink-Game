@@ -12,6 +12,7 @@ import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class Shader implements AutoCloseable {
      * 3. 解析并创建 uniform。
      * 4. 解析顶点布局并挂到 Shader 上，供渲染阶段校验。
      */
-    public static Shader fromConfig(ResourceLocation shaderConfigLocation) {
+    public static Shader fromConfig(ResourceLocation shaderConfigLocation) throws IOException, IllegalArgumentException {
         ShaderDefinition definition = parseConfig(shaderConfigLocation);
 
         String vertexSource = ResourceLoader.loadText(parseShaderSourceLocation(definition.vertex));
@@ -93,9 +94,8 @@ public class Shader implements AutoCloseable {
         return shader;
     }
 
-    private static ShaderDefinition parseConfig(ResourceLocation shaderConfigLocation) {
+    private static ShaderDefinition parseConfig(ResourceLocation shaderConfigLocation) throws IOException {
         String json = ResourceLoader.loadText(shaderConfigLocation);
-        @Nullable
         ShaderDefinition definition;
         try {
             definition = GSON.fromJson(json, ShaderDefinition.class);

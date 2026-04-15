@@ -1,6 +1,7 @@
 package io.github.theflysong.client;
 
 import org.joml.Matrix4f;
+import org.jspecify.annotations.NonNull;
 
 import io.github.theflysong.client.gl.Window;
 import io.github.theflysong.client.gl.mesh.GLVertexLayouts;
@@ -27,7 +28,8 @@ public final class ClientApp {
     private static final float WINDOW_HEIGHT = 540.0f;
     private static final String WINDOW_TITLE = "linklink - Gem3 Overlay Demo";
 
-    private final Renderer renderer = new Renderer();
+    @NonNull
+    private Renderer renderer = new Renderer();
     private GemInstance chippedGem;
 
     public void run() {

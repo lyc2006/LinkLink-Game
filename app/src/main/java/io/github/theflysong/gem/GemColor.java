@@ -1,7 +1,5 @@
 package io.github.theflysong.gem;
 
-import java.util.Vector;
-
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
