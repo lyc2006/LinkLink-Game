@@ -3,7 +3,7 @@ package io.github.theflysong.registry;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -15,11 +15,11 @@ import org.jspecify.annotations.Nullable;
  * 3. initialize() 前调用 get() 会抛异常。
  */
 public final class Deferred<V> implements Supplier<V> {
-    private final @NotNull Supplier<V> supplier;
+    private final @NonNull Supplier<V> supplier;
     private volatile @Nullable V value;
     private volatile boolean initialized;
 
-    public Deferred(@NotNull Supplier<V> supplier) {
+    public Deferred(@NonNull Supplier<V> supplier) {
         this.supplier = Objects.requireNonNull(supplier, "supplier must not be null");
         this.initialized = false;
     }
