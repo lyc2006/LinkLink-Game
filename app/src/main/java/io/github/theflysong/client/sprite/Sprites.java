@@ -11,10 +11,14 @@ import static io.github.theflysong.App.LOGGER;
 
 import io.github.theflysong.client.gl.GLTextureAtlas;
 import io.github.theflysong.data.Identifier;
+import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
+import io.github.theflysong.util.event.EventPriority;
+import io.github.theflysong.util.event.EventSubscriber;
+import io.github.theflysong.util.event.SubscribeEvent;
 import io.github.theflysong.util.registry.Deferred;
 import io.github.theflysong.util.registry.Registry;
 import io.github.theflysong.util.registry.SimpleRegistry;
@@ -139,6 +143,17 @@ public final class Sprites {
 
         for (Sprite sprite : sprites) {
             sprite.setTextureAtlas(TEXTURE_ATLAS);
+        }
+    }
+
+    @EventSubscriber
+    public static final class InitializationListener {
+        @SubscribeEvent(priority = EventPriority.LOWEST)
+        public void onClientRegistriesInit(InitializationEvent event) {
+            if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
+                return;
+            }
+            event.measure("sprites", Sprites::initialize);
         }
     }
 }

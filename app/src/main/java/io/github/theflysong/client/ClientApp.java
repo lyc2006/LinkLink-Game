@@ -14,7 +14,7 @@ import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
-import io.github.theflysong.init.InitializationEvent;
+import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.init.InitializationPipeline;
 import io.github.theflysong.level.GameMap;
 

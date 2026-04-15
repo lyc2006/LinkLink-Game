@@ -8,10 +8,14 @@ import org.jspecify.annotations.Nullable;
 import static io.github.theflysong.App.LOGGER;
 
 import io.github.theflysong.data.Identifier;
+import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
+import io.github.theflysong.util.event.EventPriority;
+import io.github.theflysong.util.event.EventSubscriber;
+import io.github.theflysong.util.event.SubscribeEvent;
 import io.github.theflysong.util.registry.Deferred;
 import io.github.theflysong.util.registry.Registry;
 import io.github.theflysong.util.registry.SimpleRegistry;
@@ -109,6 +113,17 @@ public final class GLShaders {
         for (Identifier shaderId : SHADERS.keys()) {
             SHADERS.get(shaderId)
                     .ifPresent(shader -> shader.close());
+        }
+    }
+
+    @EventSubscriber
+    public static final class InitializationListener {
+        @SubscribeEvent(priority = EventPriority.LOW)
+        public void onClientRegistriesInit(InitializationEvent event) {
+            if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
+                return;
+            }
+            event.measure("shaders", GLShaders.SHADERS::onInitialization);
         }
     }
 }

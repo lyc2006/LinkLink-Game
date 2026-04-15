@@ -1,4 +1,4 @@
-package io.github.theflysong.init;
+package io.github.theflysong.event;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

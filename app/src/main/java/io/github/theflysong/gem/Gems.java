@@ -3,6 +3,10 @@ package io.github.theflysong.gem;
 import java.util.function.Supplier;
 
 import io.github.theflysong.data.Identifier;
+import io.github.theflysong.event.InitializationEvent;
+import io.github.theflysong.util.event.EventPriority;
+import io.github.theflysong.util.event.EventSubscriber;
+import io.github.theflysong.util.event.SubscribeEvent;
 import io.github.theflysong.util.registry.Deferred;
 import io.github.theflysong.util.registry.Registry;
 import io.github.theflysong.util.registry.SimpleRegistry;
@@ -58,4 +62,15 @@ public class Gems {
     public static void initialize() {
         GEMS.onInitialization();
     }
+
+        @EventSubscriber
+        public static final class InitializationListener {
+                @SubscribeEvent(priority = EventPriority.HIGHEST)
+                public void onClientRegistriesInit(InitializationEvent event) {
+                        if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
+                                return;
+                        }
+                        event.measure("gems", Gems::initialize);
+                }
+        }
 }
