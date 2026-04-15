@@ -3,6 +3,9 @@ package io.github.theflysong.registry;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
+
 /**
  * 延迟值容器。
  *
@@ -12,11 +15,11 @@ import java.util.function.Supplier;
  * 3. initialize() 前调用 get() 会抛异常。
  */
 public final class Deferred<V> implements Supplier<V> {
-    private Supplier<V> supplier;
-    private volatile V value;
+    private final @NotNull Supplier<V> supplier;
+    private volatile @Nullable V value;
     private volatile boolean initialized;
 
-    Deferred(Supplier<V> supplier) {
+    public Deferred(@NotNull Supplier<V> supplier) {
         this.supplier = Objects.requireNonNull(supplier, "supplier must not be null");
         this.initialized = false;
     }
@@ -34,7 +37,6 @@ public final class Deferred<V> implements Supplier<V> {
         }
         this.value = built;
         this.initialized = true;
-        this.supplier = null;
     }
 
     public boolean isInitialized() {
@@ -46,6 +48,7 @@ public final class Deferred<V> implements Supplier<V> {
         if (!initialized) {
             throw new IllegalStateException("Deferred value is not initialized yet");
         }
+        assert value != null; // 由 initialize() 保证非 null
         return value;
     }
 }
