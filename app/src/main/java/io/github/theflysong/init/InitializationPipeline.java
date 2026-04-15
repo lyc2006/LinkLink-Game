@@ -8,6 +8,8 @@ import io.github.theflysong.gem.Gems;
 import io.github.theflysong.util.event.EventBus;
 import io.github.theflysong.util.event.EventPriority;
 
+import static io.github.theflysong.App.LOGGER;
+
 /**
  * 基于事件总线的初始化时机管线。
  */
@@ -20,6 +22,7 @@ public final class InitializationPipeline {
 
     public static synchronized InitializationEvent initializeClientRegistries() {
         registerDefaultListeners();
+        LOGGER.info("Posting initialization event: {}", InitializationEvent.Stage.CLIENT_REGISTRIES);
         InitializationEvent event = new InitializationEvent(InitializationEvent.Stage.CLIENT_REGISTRIES);
         BUS.post(event);
         return event;
@@ -29,6 +32,8 @@ public final class InitializationPipeline {
         if (listenersRegistered) {
             return;
         }
+
+        LOGGER.debug("Registering default initialization listeners");
 
         BUS.register(InitializationEvent.class, event -> {
             if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
@@ -66,5 +71,6 @@ public final class InitializationPipeline {
         }, EventPriority.LOWEST, false);
 
         listenersRegistered = true;
+        LOGGER.debug("Default initialization listeners registered");
     }
 }

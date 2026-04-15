@@ -32,6 +32,9 @@ dependencies {
     implementation libs.gson
     implementation libs.jspecify
     implementation libs.iogame
+    implementation libs.log4j.api
+    implementation libs.log4j.core
+    runtimeOnly libs.jansi
     runtimeOnly(variantOf(libs.lwjgl) { classifier('natives-windows') })
     runtimeOnly(variantOf(libs.lwjgl.glfw) { classifier('natives-windows') })
     runtimeOnly(variantOf(libs.lwjgl.opengl) { classifier('natives-windows') })

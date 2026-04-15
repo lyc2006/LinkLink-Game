@@ -4,9 +4,10 @@ import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import static io.github.theflysong.App.LOGGER;
+
 import io.github.theflysong.client.gl.Window;
 import io.github.theflysong.client.gl.mesh.GLGpuMesh;
-import io.github.theflysong.client.gl.mesh.GLVertexLayouts;
 import io.github.theflysong.client.gl.shader.GLShaders;
 import io.github.theflysong.client.render.GemRenderer;
 import io.github.theflysong.client.render.MapRenderer;
@@ -40,6 +41,7 @@ public final class ClientApp {
     private @Nullable GLGpuMesh atlasDebugMesh;
 
     public void run() {
+        LOGGER.info("Creating window: {}x{}, title={}", (int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE);
         new Window((int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE)
                 .onInit(this::init)
                 .onRender(this::render)
@@ -48,10 +50,11 @@ public final class ClientApp {
     }
 
     private void init() {
+        LOGGER.info("Client initialization started");
         InitializationEvent initEvent = InitializationPipeline.initializeClientRegistries();
         initEvent.initializeNanos().forEach((name, nanos) -> {
             double millis = nanos / 1_000_000.0;
-            System.out.println("[init] " + name + " initialized in " + millis + " ms");
+            LOGGER.info("[init] {} initialized in {} ms", name, String.format("%.3f", millis));
         });
 
         glEnable(GL_BLEND);
@@ -63,6 +66,7 @@ public final class ClientApp {
 
         gameMap = new GameMap(12, 8);
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
+        LOGGER.info("Client initialization completed: map={}x{}", gameMap.width(), gameMap.height());
     }
 
     private void render() {
@@ -99,6 +103,7 @@ public final class ClientApp {
     }
 
     private void cleanup() {
+        LOGGER.info("Client cleanup started");
         if (atlasDebugMesh != null) {
             atlasDebugMesh.close();
             atlasDebugMesh = null;
@@ -107,5 +112,6 @@ public final class ClientApp {
         Sprites.closeAll();
         Models.closeAll();
         GLShaders.closeAll();
+        LOGGER.info("Client cleanup finished");
     }
 }

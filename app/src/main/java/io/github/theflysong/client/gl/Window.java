@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
+import static io.github.theflysong.App.LOGGER;
+
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
@@ -99,6 +101,7 @@ public class Window {
 		errorCallback.set();
 
 		if (!glfwInit()) {
+			LOGGER.error("Unable to initialize GLFW");
 			throw new IllegalStateException("Unable to initialize GLFW");
 		}
 
@@ -111,6 +114,7 @@ public class Window {
 
 		handle = glfwCreateWindow(width, height, title, 0, 0);
 		if (handle == 0) {
+			LOGGER.error("Failed to create GLFW window, size={}x{}, title={}", width, height, title);
 			throw new IllegalStateException("Failed to create GLFW window");
 		}
 

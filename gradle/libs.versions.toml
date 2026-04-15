@@ -10,6 +10,8 @@ joml = "1.10.8"
 gson = "2.13.1"
 jspecify = "1.0.0"
 iogame = "21.34"
+log4j = "2.25.1"
+jansi = "2.4.1"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -23,3 +25,6 @@ joml = { module = "org.joml:joml", version.ref = "joml" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 iogame = { module = "com.iohao.game:run-one-netty", version.ref = "iogame" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+jansi = { module = "org.fusesource.jansi:jansi", version.ref = "jansi" }

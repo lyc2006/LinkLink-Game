@@ -21,6 +21,8 @@ import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 
+import static io.github.theflysong.App.LOGGER;
+
 import static org.lwjgl.opengl.GL11C.GL_FALSE;
 import static org.lwjgl.opengl.GL20C.*;
 
@@ -56,6 +58,7 @@ public class Shader implements AutoCloseable {
         glAttachShader(programId, fsh);
         glLinkProgram(programId);
         if (glGetProgrami(programId, GL_LINK_STATUS) == GL_FALSE) {
+            LOGGER.error("Failed to link program {}. Log: {}", programId, glGetProgramInfoLog(programId));
             throw new IllegalStateException("Failed to link program " +
                                             programId +
                                             ". Log: " +
@@ -100,6 +103,7 @@ public class Shader implements AutoCloseable {
         try {
             definition = GSON.fromJson(json, ShaderDefinition.class);
         } catch (JsonParseException ex) {
+            LOGGER.error("Invalid shader config json: {}", shaderConfigLocation, ex);
             throw new IllegalArgumentException("Invalid shader config json: " + shaderConfigLocation, ex);
         }
 
@@ -183,6 +187,7 @@ public class Shader implements AutoCloseable {
         glShaderSource(shader, src);
         glCompileShader(shader);
         if (glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
+            LOGGER.error("Failed to compile {} shader. Log: {}", typeStr, glGetShaderInfoLog(shader));
             throw new IllegalStateException("Failed to compile " +
                                             typeStr +
                                             " shader. Log: " +

@@ -28,6 +28,8 @@ import java.util.Optional;
 
 import org.lwjgl.system.MemoryUtil;
 
+import static io.github.theflysong.App.LOGGER;
+
 import static org.lwjgl.opengl.GL11C.GL_FLOAT;
 
 /**
@@ -79,6 +81,7 @@ public class Sprite implements AutoCloseable {
         try {
             definition = GSON.fromJson(json, SpriteDefinition.class);
         } catch (JsonParseException ex) {
+            LOGGER.error("Invalid sprite config json: {}", spriteConfigLocation, ex);
             throw new IllegalArgumentException("Invalid sprite config json: " + spriteConfigLocation, ex);
         }
     

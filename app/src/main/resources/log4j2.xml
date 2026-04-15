@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                disableAnsi="false"
+                noConsoleNoAnsi="false"
+                pattern="[%d{HH:mm:ss}] [%t/%highlight{%level}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}] [%C]: %msg%n%throwable" />
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.github.theflysong" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <Root level="warn">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>

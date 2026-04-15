@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
+import static io.github.theflysong.App.LOGGER;
+
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
@@ -41,6 +43,7 @@ public final class Models {
             try {
                 model = Model.fromConfig(configLocation);
             } catch (Exception ex) {
+                LOGGER.error("Failed to load model from config: {}", configLocation, ex);
                 throw new RuntimeException("Failed to load model from config: " + configLocation, ex);
             } finally {
             }

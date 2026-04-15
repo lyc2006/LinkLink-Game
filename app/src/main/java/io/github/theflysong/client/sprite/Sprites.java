@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
+import static io.github.theflysong.App.LOGGER;
+
 import io.github.theflysong.client.gl.GLTextureAtlas;
 import io.github.theflysong.data.Identifier;
 import io.github.theflysong.data.ResourceLocation;
@@ -58,6 +60,7 @@ public final class Sprites {
             try {
                 sprite = Sprite.fromConfig(configLocation);
             } catch (Exception ex) {
+                LOGGER.error("Failed to load sprite from config: {}", configLocation, ex);
                 throw new RuntimeException("Failed to load sprite from config: " + configLocation, ex);
             } finally {
             }
@@ -130,6 +133,7 @@ public final class Sprites {
         try {
             TEXTURE_ATLAS = GLTextureAtlas.buildFromSprites(sprites);
         } catch (Exception ex) {
+            LOGGER.error("Failed to build texture atlas from {} sprites", sprites.size(), ex);
             throw new RuntimeException("Failed to build texture atlas from sprites", ex);
         }
 

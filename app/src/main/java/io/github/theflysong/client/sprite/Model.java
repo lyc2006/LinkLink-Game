@@ -17,6 +17,8 @@ import io.github.theflysong.util.SideOnly;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.system.MemoryUtil;
 
+import static io.github.theflysong.App.LOGGER;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -76,6 +78,7 @@ public final class Model implements AutoCloseable {
         try {
             definition = GSON.fromJson(json, ModelDefinition.class);
         } catch (JsonParseException ex) {
+            LOGGER.error("Invalid model config json: {}", modelConfigLocation, ex);
             throw new IllegalArgumentException("Invalid model config json: " + modelConfigLocation, ex);
         }
 
