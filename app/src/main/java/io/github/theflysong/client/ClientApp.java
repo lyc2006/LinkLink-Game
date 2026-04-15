@@ -13,7 +13,8 @@ import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
-import io.github.theflysong.gem.Gems;
+import io.github.theflysong.init.InitializationEvent;
+import io.github.theflysong.init.InitializationPipeline;
 import io.github.theflysong.level.GameMap;
 
 import static org.lwjgl.opengl.GL11C.GL_BLEND;
@@ -47,11 +48,11 @@ public final class ClientApp {
     }
 
     private void init() {
-        Gems.initialize();
-        GLVertexLayouts.LAYOUTS.onInitialization();
-        Models.initialize();
-        GLShaders.SHADERS.onInitialization();
-        Sprites.initialize();
+        InitializationEvent initEvent = InitializationPipeline.initializeClientRegistries();
+        initEvent.initializeNanos().forEach((name, nanos) -> {
+            double millis = nanos / 1_000_000.0;
+            System.out.println("[init] " + name + " initialized in " + millis + " ms");
+        });
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
