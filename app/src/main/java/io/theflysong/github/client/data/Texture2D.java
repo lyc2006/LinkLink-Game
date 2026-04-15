@@ -3,7 +3,7 @@ package io.theflysong.github.client.data;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import static org.lwjgl.stb.STBImage.*;
 
 /**
@@ -51,17 +51,29 @@ public class Texture2D {
     }
 
     public static Texture2D fromImage(ByteBuffer imageBuf, @Nullable String name) {
+        return fromImage(imageBuf, name, true);
+    }
+
+    public static Texture2D fromImage(ByteBuffer imageBuf,
+                                      @Nullable String name,
+                                      boolean flipV) {
         if (imageBuf == null) {
             throw new IllegalArgumentException("Image buffer cannot be null for texture " + name);
         }
 
         int[] xp = { 0 }, yp = { 0 }, cp = { 0 };
-        ByteBuffer ret = stbi_load_from_memory(
-                imageBuf,
-                xp,
-                yp,
-                cp,
-                STBI_rgb_alpha);
+        stbi_set_flip_vertically_on_load(flipV);
+        ByteBuffer ret;
+        try {
+            ret = stbi_load_from_memory(
+                    imageBuf,
+                    xp,
+                    yp,
+                    cp,
+                    STBI_rgb_alpha);
+        } finally {
+            stbi_set_flip_vertically_on_load(false);
+        }
         if (ret == null) {
             if (name != null) {
                 throw new RuntimeException("Failed to load texture " + name + ": " + stbi_failure_reason());

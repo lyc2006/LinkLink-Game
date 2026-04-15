@@ -21,6 +21,9 @@ public class ResType {
 
     public static final ResType SHADER  = of("assets", "shader");
     public static final ResType TEXTURE = of("assets", "texture");
+    public static final ResType VERTEX_LAYOUT = of("assets", "vertexlayout");
+    public static final ResType MODEL = of("assets", "model");
+    public static final ResType SPRITE = of("assets", "sprite");
     public static final ResType TEXT    = of("data", "text");
 
     @Override

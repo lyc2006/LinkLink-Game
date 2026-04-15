@@ -53,7 +53,15 @@ public class ResLoader {
         return sb.toString();
     }
 
-    public static Shader loadShader(ResLoc vertLoc, ResLoc fragLoc) {
-        return new Shader(loadText(vertLoc), loadText(fragLoc));
+    public static ByteBuffer loadBinary(ResLoc location) {
+        try (InputStream stream = Objects.requireNonNull(ResLoader.loadFile(location), "Couldn't load file from " + location)) {
+            byte[] bytes = stream.readAllBytes();
+            ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
+            buffer.put(bytes);
+            buffer.flip();
+            return buffer;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load binary from " + location, e);
+        }
     }
 }

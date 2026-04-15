@@ -72,6 +72,12 @@ public class GLUniform implements AutoCloseable {
         set(value.x(), value.y(), value.z(), value.w());
     }
 
+    public void set(float x) {
+        buffer.position(0)
+            .putFloat(x);
+        markDirty();
+    }
+
     public void set(float x, float y, float z, float w) {
         buffer.position(0)
             .putFloat(x)
@@ -95,6 +101,7 @@ public class GLUniform implements AutoCloseable {
                 buffer.getFloat(4),
                 buffer.getFloat(8),
                 buffer.getFloat(12));
+            case F1 -> glUniform1f(location, buffer.getFloat(0));
             case MAT_F4 -> nglUniformMatrix4fv(location, 1, false, MemoryUtil.memAddress(buffer));
         }
         isDirty = false;

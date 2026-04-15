@@ -6,6 +6,7 @@ import io.theflysong.github.util.SideOnly;
 @SideOnly(Side.CLIENT)
 public enum UniformType {
     I1(4),
+    F1(4),
     F4(16),
     MAT_F4(64);
 

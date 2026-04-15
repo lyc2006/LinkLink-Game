@@ -7,6 +7,8 @@ junit-jupiter = "5.12.1"
 netty = "4.1.121.Final"
 lwjgl = "3.3.4"
 joml = "1.10.8"
+gson = "2.13.1"
+jspecify = "1.0.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -17,3 +19,5 @@ lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw", version.ref = "lwjgl" }
 lwjgl-opengl = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl" }
 lwjgl-stb = { module = "org.lwjgl:lwjgl-stb", version.ref = "lwjgl" }
 joml = { module = "org.joml:joml", version.ref = "joml" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }

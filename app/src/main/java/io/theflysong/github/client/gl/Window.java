@@ -41,6 +41,11 @@ import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glViewport;
 
+/**
+ * GLFW 窗口与主循环封装。
+ *
+ * run() 生命周期：init -> loop -> cleanup。
+ */
 @SideOnly(Side.CLIENT)
 public class Window {
 	private final int width;
@@ -48,6 +53,9 @@ public class Window {
 	private final String title;
 	private long handle;
 	private GLFWErrorCallback errorCallback;
+	private Runnable onInit;
+	private Runnable onRender;
+	private Runnable onCleanup;
 
 	public Window(int width, int height, String title) {
 		this.width = width;
@@ -61,6 +69,32 @@ public class Window {
 		cleanup();
 	}
 
+	public Window onInit(Runnable onInit) {
+		this.onInit = onInit;
+		return this;
+	}
+
+	public Window onRender(Runnable onRender) {
+		this.onRender = onRender;
+		return this;
+	}
+
+	public Window onCleanup(Runnable onCleanup) {
+		this.onCleanup = onCleanup;
+		return this;
+	}
+
+	public int width() {
+		return width;
+	}
+
+	public int height() {
+		return height;
+	}
+
+	/**
+	 * 初始化 GLFW、窗口与 OpenGL 上下文。
+	 */
 	private void init() {
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
 		errorCallback.set();
@@ -103,19 +137,37 @@ public class Window {
 
 		GL.createCapabilities();
 		glViewport(0, 0, width, height);
+
+		if (onInit != null) {
+			onInit.run();
+		}
 	}
 
+	/**
+	 * 主循环：清屏 -> 用户渲染 -> 交换缓冲 -> 事件轮询。
+	 */
 	private void loop() {
 		while (!glfwWindowShouldClose(handle)) {
 			glClearColor(0.08f, 0.10f, 0.14f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			if (onRender != null) {
+				onRender.run();
+			}
 
 			glfwSwapBuffers(handle);
 			glfwPollEvents();
 		}
 	}
 
+	/**
+	 * 释放窗口和 GLFW 相关资源。
+	 */
 	private void cleanup() {
+		if (onCleanup != null) {
+			onCleanup.run();
+		}
+
 		if (handle != 0) {
 			glfwDestroyWindow(handle);
 			handle = 0;
