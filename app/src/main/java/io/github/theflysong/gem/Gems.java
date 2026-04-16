@@ -19,7 +19,7 @@ import io.github.theflysong.util.registry.SimpleRegistry;
  */
 public class Gems {
     public static final Registry<Gem> GEMS = new SimpleRegistry<>();
-    
+
     public static final Deferred<Gem> DIAMOND = register(
             "diamond",
             Gem::new);
@@ -35,15 +35,15 @@ public class Gems {
     public static final Deferred<Gem> CHIPPED = register(
             "chipped",
             GemChipped::new);
-    
+
     public static final Deferred<Gem> FLAWED = register(
             "flawed",
             GemFlawed::new);
-    
+
     public static final Deferred<Gem> FLAWLESS = register(
             "flawless",
             GemFlawless::new);
-    
+
     public static final Deferred<Gem> EXQUISITE = register(
             "exquisite",
             GemExquisite::new);
@@ -63,14 +63,14 @@ public class Gems {
         GEMS.onInitialization();
     }
 
-        @EventSubscriber
-        public static final class InitializationListener {
-                @SubscribeEvent(priority = EventPriority.HIGHEST)
-                public void onClientRegistriesInit(InitializationEvent event) {
-                        if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
-                                return;
-                        }
-                        event.measure("gems", Gems::initialize);
-                }
+    @EventSubscriber
+    public static final class InitializationListener {
+        @SubscribeEvent(priority = EventPriority.HIGHEST)
+        public void onClientRegistriesInit(InitializationEvent event) {
+            if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
+                return;
+            }
+            event.measure("gems", Gems::initialize);
         }
+    }
 }

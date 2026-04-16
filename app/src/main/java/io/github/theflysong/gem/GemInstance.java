@@ -28,4 +28,20 @@ public class GemInstance {
     public GemColor color() {
         return color;
     }
+
+    public boolean equals(GemInstance other) {
+        return this.gem.equals(other.gem) && this.color.equals(other.color);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        GemInstance other = (GemInstance) obj;
+        return equals(other);
+    }
 }
