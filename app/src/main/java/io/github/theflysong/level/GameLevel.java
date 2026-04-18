@@ -22,7 +22,7 @@ public class GameLevel {
         gameMap = new GameMap(width, height);
     }
     
-    public boolean isGemeOver(GameMap gameMap) {
+    public boolean isGameOver(GameMap gameMap) {
         for(int i  = 0; i < gameMap.width(); i++) {
             for(int j = 0; j < gameMap.height(); j++) {
                 if(gameMap.gems[i][j] != null) {
@@ -119,12 +119,13 @@ public class GameLevel {
         return MatchResult.fail();
     }
     
-    public void tryMatch(Vector2i srcPos, Vector2i dstPos) {
+    public MatchResult tryMatch(Vector2i srcPos, Vector2i dstPos) {
         MatchResult result = isMatch(srcPos, dstPos);
         if (result.isMatch()) {
             gameMap.gems[srcPos.x][srcPos.y] = null;
             gameMap.gems[dstPos.x][dstPos.y] = null;
         }
+        return result;
     }
 
 }
