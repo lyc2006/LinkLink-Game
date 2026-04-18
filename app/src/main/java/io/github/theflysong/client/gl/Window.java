@@ -26,8 +26,11 @@ import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
+import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
@@ -57,6 +60,7 @@ public class Window {
 	private Runnable onInit;
 	private Runnable onRender;
 	private Runnable onCleanup;
+	private MouseButtonCallback onMouseButton;
 
 	public Window(int width, int height, String title) {
 		this.width = width;
@@ -82,6 +86,11 @@ public class Window {
 
 	public Window onCleanup(Runnable onCleanup) {
 		this.onCleanup = onCleanup;
+		return this;
+	}
+
+	public Window onMouseButton(MouseButtonCallback onMouseButton) {
+		this.onMouseButton = onMouseButton;
 		return this;
 	}
 
@@ -134,6 +143,19 @@ public class Window {
 		glfwSetFramebufferSizeCallback(handle,
 				(window, framebufferWidth, framebufferHeight) -> glViewport(0, 0, framebufferWidth, framebufferHeight));
 
+		glfwSetMouseButtonCallback(handle, (window, button, action, mods) -> {
+			if (onMouseButton == null) {
+				return;
+			}
+			double[] xPos = new double[1];
+			double[] yPos = new double[1];
+			int[] windowWidth = new int[1];
+			int[] windowHeight = new int[1];
+			glfwGetCursorPos(window, xPos, yPos);
+			glfwGetWindowSize(window, windowWidth, windowHeight);
+			onMouseButton.onMouseButton(window, xPos[0], yPos[0], windowWidth[0], windowHeight[0], button, action, mods);
+		});
+
 		glfwMakeContextCurrent(handle);
 		glfwSwapInterval(1);
 		glfwShowWindow(handle);
@@ -180,5 +202,17 @@ public class Window {
 		if (callback != null) {
 			callback.free();
 		}
+	}
+
+	@FunctionalInterface
+	public interface MouseButtonCallback {
+		void onMouseButton(long window,
+							 double cursorX,
+							 double cursorY,
+							 int windowWidth,
+							 int windowHeight,
+							 int button,
+							 int action,
+							 int mods);
 	}
 }

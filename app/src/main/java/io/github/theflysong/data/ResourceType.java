@@ -19,12 +19,13 @@ public class ResourceType {
         return new ResourceType(category, type);
     }
 
-    public static final ResourceType SHADER  = of("assets", "shader");
+    public static final ResourceType SHADER = of("assets", "shader");
     public static final ResourceType TEXTURE = of("assets", "texture");
     public static final ResourceType VERTEX_LAYOUT = of("assets", "vertexlayout");
     public static final ResourceType MODEL = of("assets", "model");
     public static final ResourceType SPRITE = of("assets", "sprite");
-    public static final ResourceType TEXT    = of("data", "text");
+    public static final ResourceType TEXT = of("data", "text");
+    public static final ResourceType LEVEL = of("data", "level");
 
     @Override
     public String toString() {

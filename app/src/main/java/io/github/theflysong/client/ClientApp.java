@@ -1,6 +1,7 @@
 package io.github.theflysong.client;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -18,8 +19,13 @@ import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
 import io.github.theflysong.event.InitializationEvent;
+import io.github.theflysong.input.GameMapInputHandler;
+import io.github.theflysong.input.InputDispatcher;
+import io.github.theflysong.input.MouseInputContext;
 import io.github.theflysong.init.InitializationPipeline;
 import io.github.theflysong.level.GameMap;
+import io.github.theflysong.level.GameLevel;
+import io.github.theflysong.level.MapGenerator;
 
 import static org.lwjgl.opengl.GL11C.GL_BLEND;
 import static org.lwjgl.opengl.GL11C.GL_ONE_MINUS_SRC_ALPHA;
@@ -42,16 +48,19 @@ public final class ClientApp {
     private Renderer guiRenderer = new Renderer();
     @NonNull
     private final MapRenderer mapRenderer = new MapRenderer();
-    private GameMap gameMap;
+    private GameLevel gameLevel;
     private @Nullable GLGpuMesh atlasDebugMesh;
     private @Nullable GuiRenderer gui;
     private @Nullable GuiScreen guiScreen;
+    private final InputDispatcher inputDispatcher = new InputDispatcher();
+    private final GameMapInputHandler gameMapInputHandler = new GameMapInputHandler(() -> gameLevel, mapRenderer);
 
     public void run() {
         LOGGER.info("Creating window: {}x{}, title={}", (int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE);
         new Window((int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE)
                 .onInit(this::init)
                 .onRender(this::render)
+            .onMouseButton(this::onMouseButton)
                 .onCleanup(this::cleanup)
                 .run();
     }
@@ -71,16 +80,19 @@ public final class ClientApp {
         Matrix4f projection = new Matrix4f().ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
         renderer.updateProjection(projection);
 
-        gameMap = new GameMap(12, 8);
+        gameLevel = new GameLevel(new MapGenerator().generatePreset());
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
-        setupGui();
-        LOGGER.info("Client initialization completed: map={}x{}", gameMap.width(), gameMap.height());
+        setupInputDispatcher();
+        // setupGui();
+        GameMap map = gameLevel.gameMap();
+        LOGGER.info("Client initialization completed: map={}x{}", map.width(), map.height());
     }
 
     private void render() {
-        if (gameMap == null) {
+        if (gameLevel == null) {
             return;
         }
+        GameMap gameMap = gameLevel.gameMap();
         mapRenderer.renderMap(renderer, gameMap);
         renderer.flush();
 
@@ -137,5 +149,54 @@ public final class ClientApp {
     private void setupGui() {
         gui = new GuiRenderer(guiRenderer);
         guiScreen = new ExampleScreen();
+    }
+
+    private void setupInputDispatcher() {
+        inputDispatcher.clear();
+        inputDispatcher.register(
+                "map-left-click",
+            MouseInputContext::isLeftPress,
+            gameMapInputHandler::handle);
+        inputDispatcher.register(
+                "fallback-left-click",
+                MouseInputContext::isLeftPress,
+                this::handleFallbackLeftClick);
+    }
+
+    private void onMouseButton(long windowHandle,
+                               double cursorX,
+                               double cursorY,
+                               int windowWidth,
+                               int windowHeight,
+                               int button,
+                               int action,
+                               int mods) {
+        int safeWidth = Math.max(1, windowWidth);
+        int safeHeight = Math.max(1, windowHeight);
+
+        float ndcX = (float) ((cursorX / safeWidth) * 2.0 - 1.0);
+        float ndcY = (float) (1.0 - (cursorY / safeHeight) * 2.0);
+
+        MouseInputContext context = new MouseInputContext(
+                windowHandle,
+                cursorX,
+                cursorY,
+                ndcX,
+                ndcY,
+                safeWidth,
+                safeHeight,
+                button,
+                action,
+                mods);
+
+        inputDispatcher.dispatch(context);
+    }
+    private boolean handleFallbackLeftClick(MouseInputContext context) {
+        LOGGER.info("Left click outside map, cursor=({}, {}), ndc=({}, {})",
+                String.format("%.1f", context.cursorX()),
+                String.format("%.1f", context.cursorY()),
+                String.format("%.3f", context.ndcX()),
+                String.format("%.3f", context.ndcY()));
+        return false;
     }
 }

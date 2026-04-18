@@ -2,6 +2,7 @@ package io.github.theflysong.level;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.joml.Vector2i;
@@ -16,10 +17,18 @@ import io.github.theflysong.level.MatchResult;
  * @date 2026年4月16日
  */
 public class GameLevel {
-     private GameMap gameMap;
+    private final GameMap gameMap;
 
-    public GameLevel(int width, int height) {
-        gameMap = new GameMap(width, height);
+    public GameLevel(GameMap gameMap) {
+        this.gameMap = Objects.requireNonNull(gameMap, "gameMap must not be null");
+    }
+
+    public GameMap gameMap() {
+        return gameMap;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver(gameMap);
     }
     
     public boolean isGameOver(GameMap gameMap) {
@@ -102,7 +111,10 @@ public class GameLevel {
     public MatchResult isMatch(Vector2i srcPos, Vector2i dstPos ) {
         GemInstance src = gameMap.gemAt(srcPos);
         GemInstance drc = gameMap.gemAt(dstPos);
-        if (src == null || drc == null || !srcPos.equals(dstPos)) {
+        if (src == null || drc == null || srcPos.equals(dstPos)) {
+            return MatchResult.fail();
+        }
+        if (!src.equals(drc)) {
             return MatchResult.fail();
         }
         if (noCorner(srcPos, dstPos)) {

@@ -1,11 +1,14 @@
 package io.github.theflysong.client.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 
 import io.github.theflysong.gem.GemInstance;
 import io.github.theflysong.level.GameMap;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
+
+import java.util.Optional;
 
 /**
  * 地图渲染器。
@@ -67,6 +70,47 @@ public class MapRenderer {
 				gemRenderer.renderGem(renderer, gem, modelMatrix);
 			}
 		}
+	}
+
+	/**
+	 * 将一次 NDC 点击坐标映射到地图格子。
+	 */
+	public Optional<Vector2i> pickMapCell(GameMap map, float ndcX, float ndcY) {
+		if (map == null) {
+			throw new IllegalArgumentException("map must not be null");
+		}
+
+		int width = map.width();
+		int height = map.height();
+		if (width <= 0 || height <= 0) {
+			return Optional.empty();
+		}
+
+		Layout layout = computeLayout(width, height);
+		float half = layout.gemSize * 0.5f;
+
+		float left = layout.startX - half;
+		float right = layout.startX + (width - 1) * layout.step + half;
+		float top = layout.startY + half;
+		float bottom = layout.startY - (height - 1) * layout.step - half;
+
+		if (ndcX < left || ndcX > right || ndcY > top || ndcY < bottom) {
+			return Optional.empty();
+		}
+
+		int x = (int) Math.floor((ndcX - left) / layout.step);
+		int y = (int) Math.floor((top - ndcY) / layout.step);
+		if (x < 0 || x >= width || y < 0 || y >= height) {
+			return Optional.empty();
+		}
+
+		float centerX = layout.startX + x * layout.step;
+		float centerY = layout.startY - y * layout.step;
+		if (Math.abs(ndcX - centerX) > half || Math.abs(ndcY - centerY) > half) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new Vector2i(x, y));
 	}
 
 	private Layout computeLayout(int mapWidth, int mapHeight) {

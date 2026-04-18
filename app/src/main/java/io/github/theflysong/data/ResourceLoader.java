@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class ResourceLoader {
     @Nullable
-    public static InputStream loadFile(String name) {
+    private static InputStream loadFile(String name) {
         return ResourceLoader.class.getClassLoader().getResourceAsStream(name);
     }
 

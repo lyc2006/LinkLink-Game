@@ -1,0 +1,93 @@
+{
+    "name": "map.linklink.preset",
+    "width": 6,
+    "height": 4,
+    "gemColors": 3,
+    "gemTypes": [
+        "linklink:diamond",
+        "linklink:sapphire",
+        "linklink:jade"
+    ],
+    "preset": true,
+    "presetColors": [
+        {
+            "color": "FIRE",
+            "id": 0
+        },
+        {
+            "color": "ICE",
+            "id": 1
+        },
+        {
+            "color": "LIFE",
+            "id": 2
+        }
+    ],
+    "presetTypes": [
+        {
+            "type": "linklink:diamond",
+            "id": 0
+        },
+        {
+            "type": "linklink:sapphire",
+            "id": 1
+        },
+        {
+            "type": "linklink:jade",
+            "id": 2
+        }
+    ],
+    "presetGems": [
+        {
+            "color": "FIRE",
+            "type": "linklink:diamond",
+            "id": 0
+        },
+        {
+            "color": "ICE",
+            "type": "linklink:diamond",
+            "id": 1
+        },
+        {
+            "color": "LIFE",
+            "type": "linklink:diamond",
+            "id": 2
+        },
+        {
+            "color": "FIRE",
+            "type": "linklink:sapphire",
+            "id": 3
+        },
+        {
+            "color": "ICE",
+            "type": "linklink:sapphire",
+            "id": 4
+        },
+        {
+            "color": "LIFE",
+            "type": "linklink:sapphire",
+            "id": 5
+        },
+        {
+            "color": "FIRE",
+            "type": "linklink:jade",
+            "id": 6
+        },
+        {
+            "color": "ICE",
+            "type": "linklink:jade",
+            "id": 7
+        },
+        {
+            "color": "LIFE",
+            "type": "linklink:jade",
+            "id": 8
+        }
+    ],
+    "map": [
+        [0, 3, 6, 0, 7, 7],
+        [0, 4, 7, 2, 2, 8],
+        [1, 5, 8, 0, 3, 6],
+        [3, 3, 5, 1, 4, 7]
+    ]
+}

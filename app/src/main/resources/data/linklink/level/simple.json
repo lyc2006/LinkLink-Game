@@ -1,0 +1,12 @@
+{
+    "name": "map.linklink.simple",
+    "width": 6,
+    "height": 4,
+    "gemColors": 3,
+    "gemTypes": [
+        "linklink:diamond",
+        "linklink:sapphire",
+        "linklink:jade"
+    ],
+    "preset": false
+}
