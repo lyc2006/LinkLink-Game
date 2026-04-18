@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import io.github.theflysong.client.render.preprocessor.IPreprocessor;
@@ -25,7 +26,6 @@ import io.github.theflysong.util.SideOnly;
  */
 @SideOnly(Side.CLIENT)
 public class GemRenderer {
-
     @Nullable
     protected static GemRenderer INSTANCE;
 

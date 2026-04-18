@@ -20,6 +20,7 @@ import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
 import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.input.GameMapInputHandler;
+import io.github.theflysong.input.GameMapInputHandler.MatchPathEffect;
 import io.github.theflysong.input.InputDispatcher;
 import io.github.theflysong.input.MouseInputContext;
 import io.github.theflysong.init.InitializationPipeline;
@@ -27,11 +28,7 @@ import io.github.theflysong.level.GameMap;
 import io.github.theflysong.level.GameLevel;
 import io.github.theflysong.level.MapGenerator;
 
-import static org.lwjgl.opengl.GL11C.GL_BLEND;
-import static org.lwjgl.opengl.GL11C.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11C.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11C.glBlendFunc;
-import static org.lwjgl.opengl.GL11C.glEnable;
+import static org.lwjgl.opengl.GL11C.*;
 
 /**
  * 客户端程序主体，持有窗口和渲染生命周期状态。
@@ -73,6 +70,7 @@ public final class ClientApp {
             LOGGER.info("[init] {} initialized in {} ms", name, String.format("%.3f", millis));
         });
 
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -93,7 +91,15 @@ public final class ClientApp {
             return;
         }
         GameMap gameMap = gameLevel.gameMap();
-        mapRenderer.renderMap(renderer, gameMap);
+        Vector2i selectedCell = gameMapInputHandler.currentSelection().orElse(null);
+        MatchPathEffect matchPath = gameMapInputHandler.currentMatchPath().orElse(null);
+        mapRenderer.renderMap(
+                renderer,
+                new Matrix4f().identity(),
+                gameMap,
+                selectedCell,
+                matchPath == null ? null : matchPath.points(),
+                matchPath == null ? 1.0f : matchPath.alpha());
         renderer.flush();
 
         if (gui != null && guiScreen != null) {

@@ -1,0 +1,10 @@
+{
+    "vertex": "linklink:shader/geometry.vs",
+    "fragment": "linklink:shader/geometry.fs",
+    "vertlayout": "linklink:vertexlayout/geometry",
+    "uniforms": {
+        "m4_model": "mat4",
+        "m4_projection": "mat4",
+        "v4_color_multiplier": "vec4"
+    }
+}

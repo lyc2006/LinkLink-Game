@@ -145,17 +145,7 @@ public class Shader implements AutoCloseable {
             return exact;
         }
 
-        String fallbackPath = path;
-        if (path.endsWith(".vert")) {
-            fallbackPath = path.substring(0, path.length() - 5) + ".vs";
-        } else if (path.endsWith(".frag")) {
-            fallbackPath = path.substring(0, path.length() - 5) + ".fs";
-        }
 
-        ResourceLocation fallback = new ResourceLocation(namespace, ResourceType.SHADER, fallbackPath);
-        if (ResourceLoader.loadFile(fallback) != null) {
-            return fallback;
-        }
         throw new IllegalArgumentException("Cannot resolve shader source from config value: " + value);
     }
 

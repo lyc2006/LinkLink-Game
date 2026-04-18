@@ -66,6 +66,17 @@ public class GLVertexLayouts {
                             GLVertexAttribute.floating(1, 2, GL_FLOAT, false, 12))));
 
     /**
+     * 通用几何布局：position2 + color4。
+     * 适用于不需要纹理坐标的几何图形.
+     */
+    public static final Deferred<GLVertexLayout> GEOMETRY = register("geometry",
+            () -> new GLVertexLayout(
+                24,
+                    List.of(
+                            GLVertexAttribute.floating(0, 2, GL_FLOAT, false, 0),
+                    GLVertexAttribute.floating(1, 4, GL_FLOAT, false, 8))));
+
+    /**
      * 注册一个新布局。
      */
     public static Deferred<GLVertexLayout> register(Identifier layoutId,

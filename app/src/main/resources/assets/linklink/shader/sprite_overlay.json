@@ -1,6 +1,6 @@
 {
-    "vertex": "linklink:shader/sprite.vert",
-    "fragment": "linklink:shader/sprite_overlay.frag",
+    "vertex": "linklink:shader/sprite.vs",
+    "fragment": "linklink:shader/sprite_overlay.fs",
     "vertlayout": "linklink:vertexlayout/sprite",
     "uniforms": {
         "m4_model": "mat4",

@@ -37,6 +37,7 @@ public final class GLShaders {
     public static final Deferred<Shader> SPRITE_META = GLShaders.registerFromConfig("sprite_meta");
     public static final Deferred<Shader> SPRITE_OVERLAY = GLShaders.registerFromConfig("sprite_overlay");
     public static final Deferred<Shader> SPRITE_META_OVERLAY = GLShaders.registerFromConfig("sprite_meta_overlay");
+    public static final Deferred<Shader> GEOMETRY = GLShaders.registerFromConfig("geometry");
 
     private GLShaders() {
     }
@@ -57,7 +58,8 @@ public final class GLShaders {
      */
     public static Deferred<Shader> registerFromConfig(Identifier shaderId, ResourceLocation configLocation) {
         return register(shaderId, () -> {
-            @Nullable Shader shader = null;
+            @Nullable
+            Shader shader = null;
             try {
                 shader = Shader.fromConfig(configLocation);
             } catch (Exception ex) {
@@ -73,7 +75,8 @@ public final class GLShaders {
      * 便捷注册：由 shader 配置文件创建 Shader。
      */
     public static Deferred<Shader> registerFromConfig(Identifier shaderId) {
-        return registerFromConfig(shaderId, new ResourceLocation("linklink", ResourceType.SHADER, shaderId.path() + ".json"));
+        return registerFromConfig(shaderId,
+                new ResourceLocation("linklink", ResourceType.SHADER, shaderId.path() + ".json"));
     }
 
     /**
