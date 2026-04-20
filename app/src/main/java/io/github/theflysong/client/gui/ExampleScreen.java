@@ -20,83 +20,114 @@ public final class ExampleScreen extends GuiScreen {
     protected void onInit(GuiRenderer renderer) {
         // 显式系统字体示例（Windows）。
         demoFont = renderer.fonts().loadSystemFont("segoeui.ttf", 32.0f);
+
+        addComponent(new GuiTextureComponent(
+            DEMO_TEXTURE,
+            GuiAnchor.CENTER,
+            0.0f,
+            0.0f,
+            96.0f,
+            96.0f));
+
+        addComponent(new GuiSpriteComponent(
+            Sprites.EXQUISITE_GEM.get(),
+            SpriteOverlayPreprocessor.processor(GemColor.ICE.color(), Sprites.EXQUISITE_GEM.get()),
+            GuiAnchor.LEFT,
+            100.0f,
+            0.0f,
+            96.0f,
+            96.0f));
+
+        addComponent(new GuiTextComponent(
+            "The quick brown fox jumps over the lazy dog(Segoeui Font)",
+            demoFont,
+            GuiAnchor.TOP,
+            0.0f,
+            64.0f,
+            TextStyle.normal()));
+
+        addComponent(new GuiTextComponent(
+            "The quick brown fox jumps over the lazy dog(font=null)",
+            null,
+            GuiAnchor.TOP,
+            0.0f,
+            100.0f,
+            TextStyle.normal()));
+
+        addComponent(new GuiTextComponent(
+            "永和九年，岁在癸丑，暮春之初，会于会稽山阴之兰亭，修禊事也。(font=null)",
+            null,
+            GuiAnchor.TOP,
+            0.0f,
+            140.0f,
+            TextStyle.normal().withColor(new Vector4f(1.0f, 0.5f, 0.5f, 1.0f))));
+
+        addComponent(new GuiTextComponent(
+            "Bold + Italic + Underline + Strike",
+            demoFont,
+            GuiAnchor.TOP,
+            0.0f,
+            220.0f,
+            TextStyle.normal()
+                .withBold(true)
+                .withItalic(true)
+                .withUnderline(true)
+                .withStrikethrough(true)
+                .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))));
+
+        addComponent(new GuiTextComponent(
+            "Bold + Underline + Strike",
+            demoFont,
+            GuiAnchor.TOP,
+            0.0f,
+            260.0f,
+            TextStyle.normal()
+                .withBold(true)
+                .withUnderline(true)
+                .withStrikethrough(true)
+                .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))));
+
+        addComponent(new GuiTextComponent(
+            "Italic + Underline + Strike",
+            demoFont,
+            GuiAnchor.TOP,
+            0.0f,
+            300.0f,
+            TextStyle.normal()
+                .withItalic(true)
+                .withUnderline(true)
+                .withStrikethrough(true)
+                .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))));
+
+        addComponent(new GuiTextComponent(
+            "Underline + Strike",
+            demoFont,
+            GuiAnchor.TOP,
+            0.0f,
+            340.0f,
+            TextStyle.normal()
+                .withUnderline(true)
+                .withStrikethrough(true)
+                .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))));
+
+        GuiTextComponent clickableText = addComponent(new GuiTextComponent(
+            "点击我切换删除线状态",
+            null,
+            GuiAnchor.TOP,
+            0.0f,
+            390.0f,
+            TextStyle.normal()
+                .withUnderline(true)
+                .withColor(new Vector4f(0.5f, 1.0f, 0.8f, 1.0f))));
+        clickableText.setOnClick((component, context) -> {
+            GuiTextComponent textComponent = (GuiTextComponent) component;
+            TextStyle current = textComponent.style();
+            textComponent.setStyle(current.withStrikethrough(!current.strikethrough()));
+            return true;
+        });
     }
 
     @Override
     protected void renderScreen(GuiRenderer renderer) {
-        renderer.drawTexture(DEMO_TEXTURE, GuiAnchor.CENTER, 0.0f, 0.0f, 96.0f, 96.0f);
-        renderer.drawSprite(
-                Sprites.EXQUISITE_GEM.get(),
-                GuiAnchor.LEFT, 
-                SpriteOverlayPreprocessor.processor(GemColor.ICE.color(), Sprites.EXQUISITE_GEM.get()),
-            100.0f, 0.0f, 96.0f, 96.0f);
-
-            // 传入字体对象。
-            renderer.drawText("The quick brown fox jumps over the lazy dog(Segoeui Font)", demoFont, GuiAnchor.TOP, 0.0f, 64.0f);
-            // 传入 null 时使用默认字体。
-            renderer.drawText("The quick brown fox jumps over the lazy dog(font=null)", null, GuiAnchor.TOP, 0.0f, 100.0f);
-            // 测试中文
-            renderer.drawText("永和九年，岁在癸丑，暮春之初，会于会稽山阴之兰亭，修禊事也。(font=null)", null, GuiAnchor.TOP, 0.0f, 172.0f);
-            // 测试中文
-            renderer.drawText(
-                "永和九年，岁在癸丑，暮春之初，会于会稽山阴之兰亭，修禊事也。(font=null)",
-                null,
-                GuiAnchor.TOP,
-                0.0f,
-                172.0f,
-                TextStyle.normal().withColor(new Vector4f(1.0f, 0.5f, 0.5f, 1.0f))
-            );
-
-            renderer.drawText(
-                "Bold + Italic + Underline + Strike",
-                demoFont,
-                GuiAnchor.TOP,
-                0.0f,
-                220.0f,
-                TextStyle.normal()
-                        .withBold(true)
-                        .withItalic(true)
-                        .withUnderline(true)
-                    .withStrikethrough(true)
-                    .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))
-            );
-
-            renderer.drawText(
-                "Bold + Underline + Strike",
-                demoFont,
-                GuiAnchor.TOP,
-                0.0f,
-                260.0f,
-                TextStyle.normal()
-                        .withBold(true)
-                        .withUnderline(true)
-                    .withStrikethrough(true)
-                    .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))
-            );
-
-            renderer.drawText(
-                "Italic + Underline + Strike",
-                demoFont,
-                GuiAnchor.TOP,
-                0.0f,
-                300.0f,
-                TextStyle.normal()
-                        .withItalic(true)
-                        .withUnderline(true)
-                    .withStrikethrough(true)
-                    .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))
-            );
-
-            renderer.drawText(
-                "Underline + Strike",
-                demoFont,
-                GuiAnchor.TOP,
-                0.0f,
-                360.0f,
-                TextStyle.normal()
-                        .withUnderline(true)
-                    .withStrikethrough(true)
-                    .withColor(new Vector4f(0.95f, 0.95f, 0.2f, 1.0f))
-            );
         }
 }

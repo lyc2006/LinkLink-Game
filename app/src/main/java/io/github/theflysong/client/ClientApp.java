@@ -84,7 +84,7 @@ public final class ClientApp {
         levelRenderer = new LevelRenderer(renderer);
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
         setupInputDispatcher();
-        // setupGui();
+        setupGui();
         GameMap map = gameLevel.gameMap();
         LOGGER.info("Client initialization completed: map={}x{}", map.width(), map.height());
     }
@@ -167,6 +167,10 @@ public final class ClientApp {
     private void setupInputDispatcher() {
         inputDispatcher.clear();
         inputDispatcher.register(
+            "gui-left-click",
+            MouseInputContext::isLeftPress,
+            this::handleGuiLeftClick);
+        inputDispatcher.register(
                 "map-left-click",
             MouseInputContext::isLeftPress,
             gameMapInputHandler::handle);
@@ -174,6 +178,13 @@ public final class ClientApp {
                 "fallback-left-click",
                 MouseInputContext::isLeftPress,
                 this::handleFallbackLeftClick);
+    }
+
+    private boolean handleGuiLeftClick(MouseInputContext context) {
+        if (guiScreen == null) {
+            return false;
+        }
+        return guiScreen.handleMouseClick(context);
     }
 
     private void onMouseButton(long windowHandle,

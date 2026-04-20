@@ -28,6 +28,14 @@ public final class GuiScreenSpace {
         this.height = height;
     }
 
+    public static GuiScreenSpace fromViewportSize(int viewportWidth, int viewportHeight) {
+        int safeWidth = Math.max(1, viewportWidth);
+        int safeHeight = Math.max(1, viewportHeight);
+        float currentAspect = (float) safeWidth / (float) safeHeight;
+        float width = DEFAULT_HEIGHT * currentAspect;
+        return new GuiScreenSpace(width, DEFAULT_HEIGHT);
+    }
+
     public static GuiScreenSpace fromCurrentViewport() {
         int viewportWidth;
         int viewportHeight;
@@ -37,10 +45,7 @@ public final class GuiScreenSpace {
             viewportWidth = Math.max(1, viewport.get(2));
             viewportHeight = Math.max(1, viewport.get(3));
         }
-
-        float currentAspect = (float) viewportWidth / (float) viewportHeight;
-        float width = DEFAULT_HEIGHT * currentAspect;
-        return new GuiScreenSpace(width, DEFAULT_HEIGHT);
+        return fromViewportSize(viewportWidth, viewportHeight);
     }
 
     public float width() {
@@ -53,6 +58,14 @@ public final class GuiScreenSpace {
 
     public Matrix4f projectionMatrix() {
         return new Matrix4f().ortho(0.0f, width, height, 0.0f, -1.0f, 1.0f);
+    }
+
+    public Vector2f toGuiPosition(double cursorX, double cursorY, int viewportWidth, int viewportHeight) {
+        float safeWidth = Math.max(1, viewportWidth);
+        float safeHeight = Math.max(1, viewportHeight);
+        float guiX = (float) (cursorX / safeWidth) * width;
+        float guiY = (float) (cursorY / safeHeight) * height;
+        return new Vector2f(guiX, guiY);
     }
 
     /**
