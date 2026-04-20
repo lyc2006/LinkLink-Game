@@ -1,5 +1,7 @@
 package io.github.theflysong.gem;
 
+import io.github.theflysong.level.GameLevel;
+
 /**
  * 瑕疵宝石
  *
@@ -8,12 +10,13 @@ package io.github.theflysong.gem;
  */
 public class GemFlawed extends Gem {
     public GemFlawed() {
+        super(10);
     }
     
     @Override
-    public void onDestroy(/* Game game, GameLevel level, */ GemInstance instance) {
+    public void onDestroy(/* Game game, */ GameLevel level, GemInstance instance) {
         // 瑕疵宝石将会带来一定的debuff
         // TODO...
-        super.onDestroy(/* game, level, */ instance);
+        super.onDestroy(/* game, */ level, instance);
     }
 }

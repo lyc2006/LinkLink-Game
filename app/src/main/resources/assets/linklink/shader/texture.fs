@@ -7,7 +7,7 @@ uniform vec4 uv_rect;
 uniform vec4 v4_tint_color;
 
 vec2 to_uv(vec4 rect, vec2 local_uv) {
-    return rect.xy + local_uv * rect.zw;
+    return rect.xy + local_uv * (rect.zw - rect.xy);
 }
 
 void main()

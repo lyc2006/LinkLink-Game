@@ -4,6 +4,8 @@ import org.jspecify.annotations.NonNull;
 
 import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.render.RenderInfo;
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
 
 /**
  * 渲染预处理器
@@ -11,6 +13,7 @@ import io.github.theflysong.client.render.RenderInfo;
  * @author theflysong
  * @date 2026年4月16日
  */
+@SideOnly(Side.CLIENT)
 public interface IPreprocessor {
     /**
      * 预处理方法

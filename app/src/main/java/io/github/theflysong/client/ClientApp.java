@@ -14,6 +14,7 @@ import io.github.theflysong.client.gui.ExampleScreen;
 import io.github.theflysong.client.gui.GuiRenderer;
 import io.github.theflysong.client.gui.GuiScreen;
 import io.github.theflysong.client.render.GemRenderer;
+import io.github.theflysong.client.render.LevelRenderer;
 import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
@@ -45,6 +46,7 @@ public final class ClientApp {
     private Renderer guiRenderer = new Renderer();
     @NonNull
     private final MapRenderer mapRenderer = new MapRenderer();
+    private @Nullable LevelRenderer levelRenderer;
     private GameLevel gameLevel;
     private @Nullable GLGpuMesh atlasDebugMesh;
     private @Nullable GuiRenderer gui;
@@ -79,6 +81,7 @@ public final class ClientApp {
         renderer.updateProjection(projection);
 
         gameLevel = new GameLevel(new MapGenerator().generateHard());
+        levelRenderer = new LevelRenderer(renderer);
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
         setupInputDispatcher();
         // setupGui();
@@ -93,14 +96,14 @@ public final class ClientApp {
         GameMap gameMap = gameLevel.gameMap();
         Vector2i selectedCell = gameMapInputHandler.currentSelection().orElse(null);
         MatchPathEffect matchPath = gameMapInputHandler.currentMatchPath().orElse(null);
-        mapRenderer.renderMap(
-                renderer,
+        if (levelRenderer != null) {
+            levelRenderer.renderLevel(
+                gameLevel,
                 new Matrix4f().identity(),
-                gameMap,
                 selectedCell,
                 matchPath == null ? null : matchPath.points(),
                 matchPath == null ? 1.0f : matchPath.alpha());
-        renderer.flush();
+        }
 
         if (gui != null && guiScreen != null) {
             gui.renderScreen(guiScreen);
@@ -144,6 +147,10 @@ public final class ClientApp {
         if (gui != null) {
             gui.close();
             gui = null;
+        }
+        if (levelRenderer != null) {
+            levelRenderer.close();
+            levelRenderer = null;
         }
         GemRenderer.instance().closeAll();
         Sprites.closeAll();

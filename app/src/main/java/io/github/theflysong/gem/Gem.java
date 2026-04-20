@@ -6,6 +6,7 @@ import io.github.theflysong.client.render.preprocessor.IPreprocessor;
 import io.github.theflysong.client.render.preprocessor.SpriteOverlayPreprocessor;
 import io.github.theflysong.client.sprite.Sprite;
 import io.github.theflysong.data.Identifier;
+import io.github.theflysong.level.GameLevel;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
@@ -16,13 +17,22 @@ import io.github.theflysong.util.SideOnly;
  * @date 2026年4月16日
  */
 public class Gem {
-    public Gem() {
+    protected int energyValue = 0;
+
+    public Gem(int energyValue) {
+        this.energyValue = energyValue;
     }
 
-    public void onSpawn(/* Game game, GameLevel level, */ GemInstance instance) {}
-    public void onDestroy(/* Game game, GameLevel level, */ GemInstance instance) {}
+    public Gem() {
+        this(20);
+    }
 
-    
+    public void onSpawn(/* Game game, */ GameLevel level, GemInstance instance) {}
+    public void onDestroy(/* Game game, */ GameLevel level, GemInstance instance) {
+        // 默认销毁效果：为总能量条充能
+        level.energyBar("total").chargeEnergy(energyValue);
+    }
+
     /**
      * 获取宝石的精灵ID。
      * 

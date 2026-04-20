@@ -59,10 +59,6 @@ public class Gems {
         return register(new Identifier(gemId), supplier);
     }
 
-    public static void initialize() {
-        GEMS.onInitialization();
-    }
-
     @EventSubscriber
     public static final class InitializationListener {
         @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -70,7 +66,7 @@ public class Gems {
             if (event.stage() != InitializationEvent.Stage.CLIENT_REGISTRIES) {
                 return;
             }
-            event.measure("gems", Gems::initialize);
+            event.measure("gems", GEMS::onInitialization);
         }
     }
 }

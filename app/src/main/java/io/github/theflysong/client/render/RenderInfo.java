@@ -3,6 +3,9 @@ package io.github.theflysong.client.render;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
+
 /**
  * 渲染相关信息载体
  * 用于向各类渲染器传递必要的上下文信息
@@ -11,6 +14,7 @@ import org.jspecify.annotations.NonNull;
  * @author theflysong
  * @date 2026年4月16日
  */
+@SideOnly(Side.CLIENT)
 public class RenderInfo {
     private Matrix4f projectionMatrix;
     private long frameIndex;

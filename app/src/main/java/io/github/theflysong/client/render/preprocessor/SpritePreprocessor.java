@@ -7,6 +7,8 @@ import org.jspecify.annotations.NonNull;
 import io.github.theflysong.client.render.RenderInfo;
 import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.sprite.Sprite;
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
 import io.github.theflysong.client.gl.shader.Shader;
 
 /**
@@ -15,6 +17,7 @@ import io.github.theflysong.client.gl.shader.Shader;
  * @author theflysong
  * @date 2026年4月16日
  */
+@SideOnly(Side.CLIENT)
 public class SpritePreprocessor {
     public static void preprocess(@NonNull RenderInfo info, @NonNull RenderContext ctx, @NonNull Vector4f color, @NonNull Sprite sprite) {
         Shader shader = ctx.shader();

@@ -6,10 +6,13 @@ import org.jspecify.annotations.NonNull;
 import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.render.RenderInfo;
 import io.github.theflysong.client.sprite.Sprite;
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
 
 /**
  * Meta Overlay Sprite 预处理器：在 Overlay 逻辑之上补充动画帧信息。
  */
+@SideOnly(Side.CLIENT)
 public class SpriteMetaOverlayPreprocessor {
     public static void preprocess(@NonNull RenderInfo info, @NonNull RenderContext ctx, @NonNull Vector4f color, @NonNull Sprite sprite) {
         SpriteOverlayPreprocessor.preprocess(info, ctx, color, sprite);

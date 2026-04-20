@@ -38,7 +38,7 @@ import static org.lwjgl.opengl.GL11C.glIsEnabled;
 /**
  * GUI 渲染器：提供常用绘制工具函数。
  */
-public final class GuiRenderer implements AutoCloseable {
+public class GuiRenderer implements AutoCloseable {
     private static final Vector4f WHITE = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
     private static final float GUI_FRONT_Z = -0.95f;
 
@@ -82,7 +82,6 @@ public final class GuiRenderer implements AutoCloseable {
             float height) {
         drawTexture(textureLocation, anchor, offsetX, offsetY, width, height, WHITE);
     }
-
     public void drawTexture(@NonNull ResourceLocation textureLocation,
             @NonNull GuiAnchor anchor,
             float offsetX,
@@ -95,7 +94,6 @@ public final class GuiRenderer implements AutoCloseable {
             float a) {
         drawTexture(textureLocation, anchor, offsetX, offsetY, width, height, new Vector4f(r, g, b, a));
     }
-
     public void drawTexture(@NonNull ResourceLocation textureLocation,
             @NonNull GuiAnchor anchor,
             float offsetX,
@@ -111,6 +109,31 @@ public final class GuiRenderer implements AutoCloseable {
         drawTexture(texture, anchor, offsetX, offsetY, width, height, tintColor);
     }
 
+    public void drawTexture(@NonNull ResourceLocation textureLocation,
+            @NonNull Matrix4f modelMatrix) {
+        drawTexture(textureLocation, modelMatrix, WHITE);
+    }
+
+    public void drawTexture(@NonNull ResourceLocation textureLocation,
+            @NonNull Matrix4f modelMatrix,
+            float r,
+            float g,
+            float b,
+            float a) {
+        drawTexture(textureLocation, modelMatrix, new Vector4f(r, g, b, a));
+    }
+
+    public void drawTexture(@NonNull ResourceLocation textureLocation,
+            @NonNull Matrix4f modelMatrix,
+            @NonNull Vector4f tintColor) {
+        GLTexture2D texture = textureCache.get(textureLocation);
+        if (texture == null) {
+            texture = loadTexture(textureLocation);
+            textureCache.put(textureLocation, texture);
+        }
+        drawTexture(texture, modelMatrix, tintColor);
+    }
+
     public void drawTexture(@NonNull GLTexture2D texture,
             @NonNull GuiAnchor anchor,
             float offsetX,
@@ -119,7 +142,6 @@ public final class GuiRenderer implements AutoCloseable {
             float height) {
         drawTexture(texture, anchor, offsetX, offsetY, width, height, WHITE);
     }
-
     public void drawTexture(@NonNull GLTexture2D texture,
             @NonNull GuiAnchor anchor,
             float offsetX,
@@ -132,7 +154,6 @@ public final class GuiRenderer implements AutoCloseable {
             float a) {
         drawTexture(texture, anchor, offsetX, offsetY, width, height, new Vector4f(r, g, b, a));
     }
-
     public void drawTexture(@NonNull GLTexture2D texture,
             @NonNull GuiAnchor anchor,
             float offsetX,
@@ -145,21 +166,112 @@ public final class GuiRenderer implements AutoCloseable {
         }
 
         Matrix4f model = calcModel(anchor, offsetX, offsetY, width, height);
+        submitTexture(texture, model, tintColor, 0.0f, 0.0f, 1.0f, 1.0f);
+    }
 
+    public void drawTexture(@NonNull GLTexture2D texture,
+            @NonNull Matrix4f modelMatrix) {
+        drawTexture(texture, modelMatrix, WHITE);
+    }
+
+    public void drawTexture(@NonNull GLTexture2D texture,
+            @NonNull Matrix4f modelMatrix,
+            float r,
+            float g,
+            float b,
+            float a) {
+        drawTexture(texture, modelMatrix, new Vector4f(r, g, b, a));
+    }
+
+    public void drawTexture(@NonNull GLTexture2D texture,
+            @NonNull Matrix4f modelMatrix,
+            @NonNull Vector4f tintColor) {
+        if (currentScreenSpace == null) {
+            throw new IllegalStateException("drawTexture must be called during renderScreen");
+        }
+
+        submitTexture(texture, modelMatrix, tintColor, 0.0f, 0.0f, 1.0f, 1.0f);
+    }
+
+    private void submitTexture(GLTexture2D texture,
+            Matrix4f modelMatrix,
+            Vector4f tintColor,
+            float uMin,
+            float vMin,
+            float uMax,
+            float vMax) {
         renderer.submit(new RenderItem(
                 quadMesh,
                 GLShaders.TEXTURE.get(),
-                model,
+                new Matrix4f(modelMatrix),
                 (info, ctx) -> {
                     RenderContext.activateUnit(0);
                     texture.bind();
 
                     ctx.shader().getUniform("sam_texture").ifPresent(u -> u.set(0));
-                    ctx.shader().getUniform("uv_rect").ifPresent(u -> u.set(0.0f, 0.0f, 1.0f, 1.0f));
+                    ctx.shader().getUniform("uv_rect").ifPresent(u -> u.set(uMin, vMin, uMax, vMax));
                     ctx.shader().getUniform("v4_tint_color").ifPresent(u -> u.set(tintColor));
                     ctx.shader().getUniform("m4_model").ifPresent(u -> u.set(ctx.modelMatrix()));
                     ctx.shader().getUniform("m4_projection").ifPresent(u -> u.set(info.projectionMatrix()));
                 }));
+    }
+
+    public void drawTextureRegion(@NonNull ResourceLocation textureLocation,
+            @NonNull GuiAnchor anchor,
+            float offsetX,
+            float offsetY,
+            float width,
+            float height,
+            float uMin,
+            float vMin,
+            float uMax,
+            float vMax) {
+        drawTextureRegion(textureLocation, anchor, offsetX, offsetY, width, height, WHITE, uMin, vMin, uMax, vMax);
+    }
+
+    public void drawTextureRegion(@NonNull ResourceLocation textureLocation,
+            @NonNull Matrix4f modelMatrix,
+            float uMin,
+            float vMin,
+            float uMax,
+            float vMax) {
+        drawTextureRegion(textureLocation, modelMatrix, WHITE, uMin, vMin, uMax, vMax);
+    }
+
+    public void drawTextureRegion(@NonNull ResourceLocation textureLocation,
+            @NonNull Matrix4f modelMatrix,
+            @NonNull Vector4f tintColor,
+            float uMin,
+            float vMin,
+            float uMax,
+            float vMax) {
+        if (currentScreenSpace == null) {
+            throw new IllegalStateException("drawTextureRegion must be called during renderScreen");
+        }
+
+        GLTexture2D texture = textureCache.computeIfAbsent(textureLocation, GuiRenderer::loadTexture);
+        submitTexture(texture, modelMatrix, tintColor, uMin, vMin, uMax, vMax);
+    }
+
+    public void drawTextureRegion(@NonNull ResourceLocation textureLocation,
+            @NonNull GuiAnchor anchor,
+            float offsetX,
+            float offsetY,
+            float width,
+            float height,
+            @NonNull Vector4f tintColor,
+            float uMin,
+            float vMin,
+            float uMax,
+            float vMax) {
+        if (currentScreenSpace == null) {
+            throw new IllegalStateException("drawTextureRegion must be called during renderScreen");
+        }
+
+        GLTexture2D texture = textureCache.computeIfAbsent(textureLocation, GuiRenderer::loadTexture);
+
+        Matrix4f model = calcModel(anchor, offsetX, offsetY, width, height);
+        submitTexture(texture, model, tintColor, uMin, vMin, uMax, vMax);
     }
 
     public void drawText(@NonNull String text,
@@ -249,7 +361,7 @@ public final class GuiRenderer implements AutoCloseable {
             i = nextIndex;
         }
     }
-
+    
     private void drawGlyph(GLTexture2D texture,
             float x,
             float y,
@@ -310,10 +422,6 @@ public final class GuiRenderer implements AutoCloseable {
         drawGlyph(whiteTexture, x, y, width, height, tintColor, 0.0f);
     }
 
-    public GuiFontManager fonts() {
-        return fontManager;
-    }
-
     public void drawSprite(@NonNull Sprite sprite,
             @NonNull GuiAnchor anchor,
             @NonNull IPreprocessor preprocessor,
@@ -344,6 +452,14 @@ public final class GuiRenderer implements AutoCloseable {
             GLGpuMesh mesh = sprite.model().createGpuMesh();
             return new RenderableObject(mesh, sprite.shader(), preprocessor);
         });
+    }
+
+    public GuiFontManager fonts() {
+        return fontManager;
+    }
+
+    protected Renderer renderer() {
+        return renderer;
     }
 
     @Override

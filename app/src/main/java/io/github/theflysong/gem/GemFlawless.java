@@ -1,5 +1,7 @@
 package io.github.theflysong.gem;
 
+import io.github.theflysong.level.GameLevel;
+
 /**
  * 无暇宝石
  *
@@ -8,12 +10,12 @@ package io.github.theflysong.gem;
  */
 public class GemFlawless extends Gem {
     public GemFlawless() {
+        super(30);
     }
     
     @Override
-    public void onDestroy(/* Game game, GameLevel level, */ GemInstance instance) {
+    public void onDestroy(/* Game game, */ GameLevel level, GemInstance instance) {
         // 无暇宝石将会带来一定的buff
-        // TODO...
-        super.onDestroy(/* game, level, */ instance);
+        super.onDestroy(/* game, */ level, instance);
     }
 }

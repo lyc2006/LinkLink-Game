@@ -207,6 +207,26 @@ public class MapRenderer {
 	/**
 	 * 将一次 NDC 点击坐标映射到地图格子。
 	 */
+	public MapBounds mapBounds(GameMap map) {
+		if (map == null) {
+			throw new IllegalArgumentException("map must not be null");
+		}
+
+		int width = map.width();
+		int height = map.height();
+		if (width <= 0 || height <= 0) {
+			return new MapBounds(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		}
+
+		Layout layout = computeLayout(width, height);
+		float half = layout.gemSize * 0.5f;
+		float left = layout.startX - half;
+		float right = layout.startX + (width - 1) * layout.step + half;
+		float top = layout.startY + half;
+		float bottom = layout.startY - (height - 1) * layout.step - half;
+		return new MapBounds(left, right, top, bottom, right - left, top - bottom);
+	}
+
 	public Optional<Vector2i> pickMapCell(GameMap map, float ndcX, float ndcY) {
 		if (map == null) {
 			throw new IllegalArgumentException("map must not be null");
@@ -275,5 +295,13 @@ public class MapRenderer {
 			float startY,
 			float canvasWidth,
 			float canvasHeight) {
+	}
+
+	public record MapBounds(float left,
+						float right,
+						float top,
+						float bottom,
+						float width,
+						float height) {
 	}
 }

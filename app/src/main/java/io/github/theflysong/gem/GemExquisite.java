@@ -5,6 +5,7 @@ import org.jspecify.annotations.NonNull;
 import io.github.theflysong.client.render.preprocessor.IPreprocessor;
 import io.github.theflysong.client.render.preprocessor.SpriteMetaOverlayPreprocessor;
 import io.github.theflysong.client.sprite.Sprite;
+import io.github.theflysong.level.GameLevel;
 import io.github.theflysong.util.SideOnly;
 import io.github.theflysong.util.Side;
 
@@ -16,13 +17,14 @@ import io.github.theflysong.util.Side;
  */
 public class GemExquisite extends Gem {
     public GemExquisite() {
+        super(50);
     }
     
     @Override
-    public void onDestroy(/* Game game, GameLevel level, */ GemInstance instance) {
+    public void onDestroy(/* Game game, */ GameLevel level, GemInstance instance) {
         // 精美宝石将会带来一定的buff
         // TODO...
-        super.onDestroy(/* game, level, */ instance);
+        super.onDestroy(/* game, */ level, instance);
     }
 
     // 精美宝石使用特殊的预处理器来渲染动画

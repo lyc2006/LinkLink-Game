@@ -1,12 +1,18 @@
 package io.github.theflysong.level;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.joml.Vector2i;
+import org.jspecify.annotations.NonNull;
 
+import io.github.theflysong.bars.Bars;
+import io.github.theflysong.bars.EnergyBar;
 import io.github.theflysong.gem.GemInstance;
 import io.github.theflysong.level.MatchResult;
 
@@ -18,13 +24,27 @@ import io.github.theflysong.level.MatchResult;
  */
 public class GameLevel {
     private final GameMap gameMap;
+    private final Map<String, EnergyBar> energyBars = new HashMap<>();
 
     public GameLevel(GameMap gameMap) {
         this.gameMap = Objects.requireNonNull(gameMap, "gameMap must not be null");
+        addEnergyBar("total", Bars.TOTAL.get());
     }
 
     public GameMap gameMap() {
         return gameMap;
+    }
+
+    public EnergyBar energyBar(String id) {
+        return energyBars.get(id);
+    }
+
+    public void addEnergyBar(String id, @NonNull EnergyBar bar) {
+        energyBars.put(id, bar);
+    }
+
+    public Map<String, EnergyBar> energyBars() {
+        return Collections.unmodifiableMap(energyBars);
     }
 
     public boolean isGameOver() {
@@ -134,10 +154,17 @@ public class GameLevel {
     public MatchResult tryMatch(Vector2i srcPos, Vector2i dstPos) {
         MatchResult result = isMatch(srcPos, dstPos);
         if (result.isMatch()) {
-            gameMap.gems[srcPos.x][srcPos.y] = null;
-            gameMap.gems[dstPos.x][dstPos.y] = null;
+            destroyGemAt(srcPos);
+            destroyGemAt(dstPos);
         }
         return result;
     }
 
+    public void destroyGemAt(Vector2i pos) {
+        GemInstance gem = gameMap.gemAt(pos);
+        if (gem != null) {
+            gem.gem().onDestroy(this, gem);
+            gameMap.gems[pos.x][pos.y] = null;
+        }
+    }
 }

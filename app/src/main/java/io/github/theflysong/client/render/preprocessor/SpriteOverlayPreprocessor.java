@@ -6,6 +6,8 @@ import org.jspecify.annotations.NonNull;
 import io.github.theflysong.client.render.RenderContext;
 import io.github.theflysong.client.render.RenderInfo;
 import io.github.theflysong.client.sprite.Sprite;
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
 
 /**
  * 
@@ -13,6 +15,7 @@ import io.github.theflysong.client.sprite.Sprite;
  * @author theflysong
  * @date 2026年4月16日
  */
+@SideOnly(Side.CLIENT)
 public class SpriteOverlayPreprocessor {
     public static void preprocess(@NonNull RenderInfo info, @NonNull RenderContext ctx, @NonNull Vector4f color, @NonNull Sprite sprite) {
         // 先上传 sprite 通用 uniform

@@ -13,6 +13,8 @@ import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
 import io.github.theflysong.client.gl.shader.Shader;
+import io.github.theflysong.util.Side;
+import io.github.theflysong.util.SideOnly;
 
 /**
  * 渲染上下文。
@@ -21,6 +23,7 @@ import io.github.theflysong.client.gl.shader.Shader;
  * 2. 提供 modelMatrix 栈，允许在局部修改前后保存与恢复矩阵状态。
  * 3. 承接原 GLManager 的纹理绑定状态，供纹理上传与预处理阶段复用。
  */
+@SideOnly(Side.CLIENT)
 public final class RenderContext {
 	private final @NonNull Shader shader;
 	private final @NonNull RenderItem item;
