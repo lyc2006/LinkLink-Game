@@ -85,7 +85,7 @@ public class GameLevel {
     }
 
     public Optional<List<Vector2i>> twoCorners(Vector2i srcPos, Vector2i dstPos ) {
-        for (int i = 0; i < gameMap.width(); i++) {
+        for (int i = -1; i <= gameMap.width(); i++) {
             Vector2i corner1 = new Vector2i(i, srcPos.y);
             Vector2i corner2 = new Vector2i(i, dstPos.y);
             if (gameMap.gemAt(corner1) == null && gameMap.gemAt(corner2) == null) {
@@ -95,7 +95,7 @@ public class GameLevel {
             }
         }
 
-        for (int j = 0; j < gameMap.height(); j++) {
+        for (int j = -1; j <= gameMap.height(); j++) {
             Vector2i corner1 = new Vector2i(srcPos.x, j);
             Vector2i corner2 = new Vector2i(dstPos.x, j);
             if (gameMap.gemAt(corner1) == null && gameMap.gemAt(corner2) == null) {

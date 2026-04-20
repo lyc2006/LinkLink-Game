@@ -49,6 +49,9 @@ public class GameMap
 
     public GemInstance gemAt(int x, int y) {
         if (x < 0 || x >= width || y < 0 || y >= height) {
+            if(x == -1 || x == width || y == -1 || y == height) {
+                return null; 
+            }
             throw new IndexOutOfBoundsException("Invalid map coordinate: (" + x + ", " + y + ")");
         }
         return gems[x][y];
@@ -56,6 +59,9 @@ public class GameMap
 
     public GemInstance gemAt(Vector2i pos) {
         if (pos.x < 0 || pos.x >= width || pos.y < 0 || pos.y >= height) {
+            if(pos.x == -1 || pos.x == width || pos.y == -1 || pos.y == height) {
+                return null; 
+            }
             throw new IndexOutOfBoundsException("Invalid map coordinate: (" + pos.x + ", " + pos.y + ")");
         }
         return gems[pos.x][pos.y];
