@@ -1,0 +1,16 @@
+{
+    "name": "map.linklink.hard",
+    "width": 10,
+    "height": 8,
+    "gemColors": 5,
+    "gemTypes": [
+        "linklink:diamond",
+        "linklink:sapphire",
+        "linklink:jade",
+        "linklink:chipped",
+        "linklink:flawed",
+        "linklink:flawless",
+        "linklink:exquisite"
+    ],
+    "preset": false
+}

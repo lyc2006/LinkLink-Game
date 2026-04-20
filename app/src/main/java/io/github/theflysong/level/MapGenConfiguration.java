@@ -115,6 +115,10 @@ public class MapGenConfiguration {
         return load("simple");
     }
 
+    public static MapGenConfiguration loadHard() {
+        return load("hard");
+    }
+
     public static MapGenConfiguration loadPreset() {
         return load("preset");
     }

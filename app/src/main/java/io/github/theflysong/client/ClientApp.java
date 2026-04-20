@@ -78,7 +78,7 @@ public final class ClientApp {
         Matrix4f projection = new Matrix4f().ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
         renderer.updateProjection(projection);
 
-        gameLevel = new GameLevel(new MapGenerator().generatePreset());
+        gameLevel = new GameLevel(new MapGenerator().generateHard());
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
         setupInputDispatcher();
         // setupGui();

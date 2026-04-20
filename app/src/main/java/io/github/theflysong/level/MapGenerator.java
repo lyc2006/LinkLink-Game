@@ -29,6 +29,10 @@ public class MapGenerator {
 		return generate(MapGenConfiguration.load(levelPathOrName));
 	}
 
+	public GameMap generateHard() {
+		return generate(MapGenConfiguration.loadHard());
+	}
+
 	public GameMap generateSimple() {
 		return generate(MapGenConfiguration.loadSimple());
 	}
