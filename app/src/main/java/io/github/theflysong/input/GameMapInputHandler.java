@@ -4,12 +4,15 @@ import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.level.GameMap;
 import io.github.theflysong.level.GameLevel;
 import io.github.theflysong.level.MatchResult;
+
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Vector;
 import java.util.function.Supplier;
 
 import static io.github.theflysong.App.LOGGER;
@@ -56,10 +59,7 @@ public class GameMapInputHandler {
 		this.mapRenderer = Objects.requireNonNull(mapRenderer, "mapRenderer must not be null");
 	}
 
-	/**
-	 * @return true 表示点击命中了地图格子并已消费输入。
-	 */
-	public boolean handle(MouseInputContext context) {
+	public boolean handleClick(Vector2f nc, MouseInputContext context) {
 		if (!context.isLeftPress()) {
 			return false;
 		}
@@ -70,13 +70,8 @@ public class GameMapInputHandler {
 		}
 		GameMap gameMap = gameLevel.gameMap();
 
-		float aspect = context.windowHeight() > 0
-				? (float) context.windowWidth() / (float) context.windowHeight()
-				: 1.0f;
-		float mapSpaceX = context.ndcX() * aspect;
-		float mapSpaceY = context.ndcY();
-
-		Optional<Vector2i> cell = mapRenderer.pickMapCell(gameMap, mapSpaceX, mapSpaceY);
+		LOGGER.info("Handle map click at normalized coordinates ({}, {})", nc.x, nc.y);
+		Optional<Vector2i> cell = mapRenderer.pickMapCell(gameMap, nc);
 		if (cell.isEmpty()) {
 			return false;
 		}
@@ -90,13 +85,11 @@ public class GameMapInputHandler {
 
 		if (firstSelection == null) {
 			firstSelection = new Vector2i(coord);
-			LOGGER.info("First select cell=({}, {}), cursor=({}, {}), mapSpace=({}, {})",
+			LOGGER.info("First select cell=({}, {}), cursor=({}, {})",
 					coord.x,
 					coord.y,
 					String.format("%.1f", context.cursorX()),
-					String.format("%.1f", context.cursorY()),
-					String.format("%.3f", mapSpaceX),
-					String.format("%.3f", mapSpaceY));
+					String.format("%.1f", context.cursorY()));
 			return true;
 		}
 

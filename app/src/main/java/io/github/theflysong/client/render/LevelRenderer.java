@@ -4,10 +4,9 @@ import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
+
 import io.github.theflysong.bars.EnergyBar;
 import io.github.theflysong.client.gui.GuiRenderer;
-import io.github.theflysong.client.gui.GuiScreen;
 import io.github.theflysong.client.gui.GuiScreenSpace;
 import io.github.theflysong.level.GameLevel;
 import io.github.theflysong.level.GameMap;
@@ -15,17 +14,15 @@ import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
 
 /**
- * 
- *
- * @author theflysong
- * @date 2026年4月21日
+ * 关卡渲染帮助器。
  */
 @SideOnly(Side.CLIENT)
 public class LevelRenderer extends GuiRenderer {
-    private final MapRenderer mapRenderer = new MapRenderer();
     private static final String TOTAL_BAR_ID = "total";
-    private static final float TOTAL_BAR_ASPECT_WIDTH_OVER_HEIGHT = 0.25f; // 宽高比固定为 1:4
+    private static final float TOTAL_BAR_ASPECT_WIDTH_OVER_HEIGHT = 0.25f;
     private static final float TOTAL_BAR_MIN_MARGIN = 16.0f;
+
+    private final MapRenderer mapRenderer = new MapRenderer();
 
     public LevelRenderer(Renderer renderer) {
         super(renderer);
@@ -40,6 +37,24 @@ public class LevelRenderer extends GuiRenderer {
             Vector2i selectedCell,
             List<Vector2i> matchPathPoints,
             float matchPathAlpha) {
+        renderMap(level, modelMatrix, selectedCell, matchPathPoints, matchPathAlpha);
+        renderBars(level, modelMatrix);
+    }
+
+    public void renderMap(GameLevel level,
+            Matrix4f modelMatrix,
+            Vector2i selectedCell,
+            List<Vector2i> matchPathPoints,
+            float matchPathAlpha) {
+        renderMap(level, modelMatrix, selectedCell, matchPathPoints, matchPathAlpha, false);
+    }
+
+    public void renderMap(GameLevel level,
+            Matrix4f modelMatrix,
+            Vector2i selectedCell,
+            List<Vector2i> matchPathPoints,
+            float matchPathAlpha,
+            boolean showHitRange) {
         if (level == null) {
             throw new IllegalArgumentException("level must not be null");
         }
@@ -47,25 +62,33 @@ public class LevelRenderer extends GuiRenderer {
         GameMap gameMap = level.gameMap();
         GuiScreenSpace screenSpace = GuiScreenSpace.fromCurrentViewport();
         float aspect = screenSpace.width() / screenSpace.height();
+        Matrix4f mapProjection = new Matrix4f().ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
 
-        renderer().updateProjection(new Matrix4f().ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f));
+        renderer().updateProjection(mapProjection);
         mapRenderer.renderMap(renderer(),
                 modelMatrix == null ? new Matrix4f().identity() : new Matrix4f(modelMatrix),
                 gameMap,
                 selectedCell,
                 matchPathPoints,
-                matchPathAlpha);
+                matchPathAlpha,
+                showHitRange);
         renderer().flush();
 
-        renderScreen(new GuiScreen() {
-            @Override
-            protected void renderScreen(GuiRenderer renderer) {
-                renderBars(level, modelMatrix == null ? new Matrix4f().identity() : new Matrix4f(modelMatrix));
-            }
-        });
+        renderer().updateProjection(screenSpace.projectionMatrix());
     }
 
-    private void renderBars(GameLevel level, Matrix4f modelMatrix) {
+    public void renderBars(GameLevel level) {
+        renderBars(level, new Matrix4f().identity());
+    }
+
+    public void renderBars(GameLevel level, Matrix4f modelMatrix) {
+        if (level == null) {
+            throw new IllegalArgumentException("level must not be null");
+        }
+
+        GuiScreenSpace screenSpace = GuiScreenSpace.fromCurrentViewport();
+        renderer().updateProjection(screenSpace.projectionMatrix());
+
         for (var entry : level.energyBars().entrySet()) {
             String barId = entry.getKey();
             EnergyBar bar = entry.getValue();
@@ -76,10 +99,11 @@ public class LevelRenderer extends GuiRenderer {
             if (barRenderer == null) {
                 continue;
             }
-            // 计算该 bar 的布局 modelMatrix
             Matrix4f barMatrix = computeBarModelMatrix(barId, level, new Matrix4f(modelMatrix));
             barRenderer.render(bar, level, this, renderer(), barMatrix);
         }
+
+        renderer().flush();
     }
 
     private Matrix4f computeBarModelMatrix(String barId, GameLevel level, Matrix4f baseMatrix) {
@@ -112,7 +136,6 @@ public class LevelRenderer extends GuiRenderer {
         float leftX = leftPx - margin - barWidth;
         float topY = centerY - barHeight * 0.5f;
 
-        // 构造 modelMatrix：左上角为原点，局部空间为 [0, 1]^2
         return new Matrix4f(baseMatrix)
                 .translate(leftX, topY, 0.0f)
                 .scale(barWidth, barHeight, 1.0f);
@@ -129,5 +152,10 @@ public class LevelRenderer extends GuiRenderer {
 
     public MapRenderer mapRenderer() {
         return mapRenderer;
+    }
+
+    @Override
+    public Renderer renderer() {
+        return super.renderer();
     }
 }

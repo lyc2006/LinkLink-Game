@@ -1,6 +1,7 @@
 package io.github.theflysong.client.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector4f;
 
@@ -8,6 +9,8 @@ import io.github.theflysong.gem.GemInstance;
 import io.github.theflysong.level.GameMap;
 import io.github.theflysong.util.Side;
 import io.github.theflysong.util.SideOnly;
+
+import static io.github.theflysong.App.LOGGER;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +53,8 @@ public class MapRenderer {
 
 	public static final int CANVAS_COLOR = 0xCBCCD4;
 	public static final int MATCH_PATH_COLOR = 0xFFE45A;
+	public static final int HIT_RANGE_COLOR = 0x34C759;
+	public static final int RC_DEBUG_RECT_COLOR = 0x000000;
 
 	private static Vector4f rgba(int hex) {
 		float r = ((hex >> 16) & 0xFF) / 255.0f;
@@ -119,7 +124,27 @@ public class MapRenderer {
 						 GameMap map,
 						 Vector2i selectedCell,
 						 List<Vector2i> matchPathPoints,
+						 float matchPathAlpha,
+						 boolean showHitRange) {
+		renderMapInternal(renderer, modelMatrix, map, selectedCell, matchPathPoints, matchPathAlpha, showHitRange);
+	}
+
+	public void renderMap(Renderer renderer,
+						 Matrix4f modelMatrix,
+						 GameMap map,
+						 Vector2i selectedCell,
+						 List<Vector2i> matchPathPoints,
 						 float matchPathAlpha) {
+		renderMapInternal(renderer, modelMatrix, map, selectedCell, matchPathPoints, matchPathAlpha, false);
+	}
+
+	private void renderMapInternal(Renderer renderer,
+							 Matrix4f modelMatrix,
+							 GameMap map,
+							 Vector2i selectedCell,
+							 List<Vector2i> matchPathPoints,
+							 float matchPathAlpha,
+							 boolean showHitRange) {
 		if (renderer == null) {
 			throw new IllegalArgumentException("renderer must not be null");
 		}
@@ -136,16 +161,19 @@ public class MapRenderer {
 		Layout layout = computeLayout(width, height);
 		renderCanvas(renderer, new Matrix4f(modelMatrix)
 				.scale(layout.canvasWidth, layout.canvasHeight, 1.0f));
+		renderRcDebugRect(renderer, modelMatrix);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				float centerX = layout.startX + x * layout.step;
-				float centerY = layout.startY - y * layout.step;
+				Vector2f center = slotToRender(map, new Vector2i(x, y));
 				boolean selected = selectedCell != null && selectedCell.x == x && selectedCell.y == y;
 				Matrix4f newMatrix = new Matrix4f(modelMatrix)
-						.translate(centerX, centerY, 0.0f)
+						.translate(center.x, center.y, 0.0f)
 						.scale(layout.gemSize, layout.gemSize, 1.0f);
 				// 先绘制槽位背景
 				renderSlot(renderer, newMatrix, layout, selected);
+				if (showHitRange) {
+					renderHitRangeOverlay(renderer, newMatrix);
+				}
 
 				// 然后绘制宝石
 				GemInstance gem = map.gemAt(x, y);
@@ -160,6 +188,19 @@ public class MapRenderer {
 		}
 
 		renderMatchPath(renderer, modelMatrix, layout, matchPathPoints, matchPathAlpha);
+	}
+
+	private void renderRcDebugRect(Renderer renderer, Matrix4f modelMatrix) {
+		geometryRenderer().renderRectangle(
+				renderer,
+				new Matrix4f(modelMatrix).translate(0, 0,  -1).scale(0.4f, 0.4f, 1.0f),
+				rgba(RC_DEBUG_RECT_COLOR));
+	}
+
+	private void renderHitRangeOverlay(Renderer renderer, Matrix4f modelMatrix) {
+		Vector4f color = rgba(HIT_RANGE_COLOR);
+		color.w = 0.28f;
+		geometryRenderer().renderRectangle(renderer, modelMatrix, 0.0f, 0.0f, 0.86f, 0.86f, color);
 	}
 
 	private void renderMatchPath(Renderer renderer,
@@ -205,7 +246,9 @@ public class MapRenderer {
 	}
 
 	/**
-	 * 将一次 NDC 点击坐标映射到地图格子。
+	 * 返回地图中“有格子”的实际边界。
+	 *
+	 * 该边界不包含渲染时为了连接线预留的外圈区域。
 	 */
 	public MapBounds mapBounds(GameMap map) {
 		if (map == null) {
@@ -227,10 +270,44 @@ public class MapRenderer {
 		return new MapBounds(left, right, top, bottom, right - left, top - bottom);
 	}
 
-	public Optional<Vector2i> pickMapCell(GameMap map, float ndcX, float ndcY) {
+	/**
+	 * 返回地图渲染时使用的完整画布边界。
+	 *
+	 * 该边界包含外圈预留区域，与 renderMap(...) 中的 canvas 绘制尺寸一致。
+	 */
+	public MapBounds mapCanvasBounds(GameMap map) {
 		if (map == null) {
 			throw new IllegalArgumentException("map must not be null");
 		}
+
+		int width = map.width();
+		int height = map.height();
+		if (width <= 0 || height <= 0) {
+			return new MapBounds(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		}
+
+		Layout layout = computeLayout(width, height);
+		float halfCanvasWidth = layout.canvasWidth * 0.5f;
+		float halfCanvasHeight = layout.canvasHeight * 0.5f;
+		return new MapBounds(-halfCanvasWidth, halfCanvasWidth, halfCanvasHeight, -halfCanvasHeight,
+				layout.canvasWidth, layout.canvasHeight);
+	}
+
+	public Optional<Vector2i> pickMapCell(GameMap map, Vector2f nc) {
+		if (map == null) {
+			throw new IllegalArgumentException("map must not be null");
+		}
+		if (nc == null) {
+			throw new IllegalArgumentException("nc must not be null");
+		}
+
+		MapBounds canvas = mapCanvasBounds(map);
+		Vector2f rc = new Vector2f(
+				canvas.left() + nc.x * canvas.width(),
+				canvas.top() - nc.y * canvas.height()
+		);
+		LOGGER.info("Pick map cell at normalized coordinates ({}, {}), converted to render coordinates ({}, {})",
+				nc.x, nc.y, rc.x, rc.y);
 
 		int width = map.width();
 		int height = map.height();
@@ -241,24 +318,69 @@ public class MapRenderer {
 		Layout layout = computeLayout(width, height);
 		float half = layout.gemSize * 0.5f;
 
-		float left = layout.startX - half;
-		float right = layout.startX + (width - 1) * layout.step + half;
-		float top = layout.startY + half;
-		float bottom = layout.startY - (height - 1) * layout.step - half;
-
-		if (ndcX < left || ndcX > right || ndcY > top || ndcY < bottom) {
-			return Optional.empty();
-		}
-
-		int x = (int) Math.floor((ndcX - left) / layout.step);
-		int y = (int) Math.floor((top - ndcY) / layout.step);
+		int x = Math.round((rc.x - layout.startX) / layout.step);
+		int y = Math.round((layout.startY - rc.y) / layout.step);
 		if (x < 0 || x >= width || y < 0 || y >= height) {
 			return Optional.empty();
 		}
 
 		float centerX = layout.startX + x * layout.step;
 		float centerY = layout.startY - y * layout.step;
-		if (Math.abs(ndcX - centerX) > half || Math.abs(ndcY - centerY) > half) {
+		if (Math.abs(rc.x - centerX) > half || Math.abs(rc.y - centerY) > half) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new Vector2i(x, y));
+	}
+
+	public Vector2f slotToRender(GameMap map, Vector2i slot) {
+		if (map == null) {
+			throw new IllegalArgumentException("map must not be null");
+		}
+		if (slot == null) {
+			throw new IllegalArgumentException("slot must not be null");
+		}
+
+		int width = map.width();
+		int height = map.height();
+		if (width <= 0 || height <= 0) {
+			return new Vector2f(0.0f, 0.0f);
+		}
+
+		Layout layout = computeLayout(width, height);
+		return new Vector2f(
+				layout.startX + slot.x * layout.step,
+				layout.startY - slot.y * layout.step);
+	}
+
+	public Optional<Vector2i> renderToSlot(GameMap map, Vector2f rc) {
+		if (map == null) {
+			throw new IllegalArgumentException("map must not be null");
+		}
+		if (rc == null) {
+			throw new IllegalArgumentException("rc must not be null");
+		}
+
+		int width = map.width();
+		int height = map.height();
+		if (width <= 0 || height <= 0) {
+			return Optional.empty();
+		}
+
+		Layout layout = computeLayout(width, height);
+		float half = layout.gemSize * 0.5f;
+		float left = layout.startX - half;
+		float right = layout.startX + (width - 1) * layout.step + half;
+		float top = layout.startY + half;
+		float bottom = layout.startY - (height - 1) * layout.step - half;
+
+		if (rc.x < left || rc.x > right || rc.y > top || rc.y < bottom) {
+			return Optional.empty();
+		}
+
+		int x = (int) Math.floor((rc.x - left) / layout.step);
+		int y = (int) Math.floor((top - rc.y) / layout.step);
+		if (x < 0 || x >= width || y < 0 || y >= height) {
 			return Optional.empty();
 		}
 

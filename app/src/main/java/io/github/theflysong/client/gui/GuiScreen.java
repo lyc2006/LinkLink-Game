@@ -3,6 +3,7 @@ package io.github.theflysong.client.gui;
 import io.github.theflysong.input.MouseInputContext;
 import org.joml.Vector2f;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.List;
 public abstract class GuiScreen implements AutoCloseable {
     private boolean initialized;
     private final List<GuiComponent> components = new ArrayList<>();
+    private @Nullable GuiScreenSpace currentScreenSpace;
 
     public final void render(GuiRenderer renderer) {
         if (renderer == null) {
@@ -27,12 +29,17 @@ public abstract class GuiScreen implements AutoCloseable {
             onInit(renderer);
             initialized = true;
         }
+        if (currentScreenSpace == null) {
+            refreshLayout(GuiScreenSpace.fromCurrentViewport());
+        }
         renderScreen(renderer);
         renderComponents(renderer);
     }
 
     public boolean handleMouseClick(@NonNull MouseInputContext context) {
-        GuiScreenSpace screenSpace = GuiScreenSpace.fromViewportSize(context.windowWidth(), context.windowHeight());
+        GuiScreenSpace screenSpace = currentScreenSpace != null
+                ? currentScreenSpace
+                : GuiScreenSpace.fromViewportSize(context.windowWidth(), context.windowHeight());
         Vector2f guiPosition = screenSpace.toGuiPosition(
                 context.cursorX(),
                 context.cursorY(),
@@ -51,10 +58,21 @@ public abstract class GuiScreen implements AutoCloseable {
         return false;
     }
 
+    public final void refreshLayout(@NonNull GuiScreenSpace screenSpace) {
+        currentScreenSpace = screenSpace;
+        onRefreshLayout(screenSpace);
+        for (GuiComponent component : components) {
+            component.refreshLayout(screenSpace);
+        }
+    }
+
     /**
      * 首次渲染前调用一次。
      */
     protected void onInit(GuiRenderer renderer) {
+    }
+
+    protected void onRefreshLayout(@NonNull GuiScreenSpace screenSpace) {
     }
 
     /**

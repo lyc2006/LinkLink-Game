@@ -55,6 +55,9 @@ public abstract class GuiComponent {
         return onClick.onClick(this, context);
     }
 
+    public void refreshLayout(@NonNull GuiScreenSpace screenSpace) {
+    }
+
     protected abstract void renderComponent(@NonNull GuiRenderer renderer);
 
     public @NonNull GuiAnchor anchor() {

@@ -28,6 +28,7 @@ import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
@@ -61,6 +62,7 @@ public class Window {
 	private Runnable onRender;
 	private Runnable onCleanup;
 	private MouseButtonCallback onMouseButton;
+	private WindowSizeCallback onWindowSize;
 
 	public Window(int width, int height, String title) {
 		this.width = width;
@@ -91,6 +93,11 @@ public class Window {
 
 	public Window onMouseButton(MouseButtonCallback onMouseButton) {
 		this.onMouseButton = onMouseButton;
+		return this;
+	}
+
+	public Window onWindowSize(WindowSizeCallback onWindowSize) {
+		this.onWindowSize = onWindowSize;
 		return this;
 	}
 
@@ -142,6 +149,11 @@ public class Window {
 
 		glfwSetFramebufferSizeCallback(handle,
 				(window, framebufferWidth, framebufferHeight) -> glViewport(0, 0, framebufferWidth, framebufferHeight));
+		glfwSetWindowSizeCallback(handle, (window, windowWidth, windowHeight) -> {
+			if (onWindowSize != null) {
+				onWindowSize.onWindowSize(window, windowWidth, windowHeight);
+			}
+		});
 
 		glfwSetMouseButtonCallback(handle, (window, button, action, mods) -> {
 			if (onMouseButton == null) {
@@ -165,6 +177,9 @@ public class Window {
 
 		if (onInit != null) {
 			onInit.run();
+		}
+		if (onWindowSize != null) {
+			onWindowSize.onWindowSize(handle, width, height);
 		}
 	}
 
@@ -214,5 +229,10 @@ public class Window {
 							 int button,
 							 int action,
 							 int mods);
+	}
+
+	@FunctionalInterface
+	public interface WindowSizeCallback {
+		void onWindowSize(long window, int width, int height);
 	}
 }
