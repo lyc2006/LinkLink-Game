@@ -21,6 +21,7 @@ public final class ExampleScreen extends GuiScreen {
     private GuiFont demoFont;
     private GuiTextComponent hoverItalicText;
     private boolean hoverItalicActive;
+    private GuiButtonComponent button;
 
     @Override
     protected void onInit(GuiRenderer renderer) {
@@ -139,6 +140,26 @@ public final class ExampleScreen extends GuiScreen {
             0.0f,
             440.0f,
             TextStyle.normal().withColor(new Vector4f(0.85f, 0.95f, 1.0f, 1.0f))));
+
+        button = addComponent(new GuiButtonComponent(
+            new ResourceLocation("linklink", ResourceType.TEXTURE, "gui/button_disabled.png"),
+            new ResourceLocation("linklink", ResourceType.TEXTURE, "gui/button_ready.png"),
+            new ResourceLocation("linklink", ResourceType.TEXTURE, "gui/button.png"),
+            GuiAnchor.BOTTOM,
+            0.0f,
+            -50.0f,
+            50.0f,
+            50.0f));
+        button.setOnClick((component, context) -> {
+            if (button.enabled()) {
+                TextStyle current = clickableText.style();
+                clickableText.setStyle(current.withStrikethrough(!current.strikethrough()));
+            }
+            return true;
+        });
+        // button.setDisabled(true);
+
+        button.setOverlayTexture(new ResourceLocation(ResourceType.TEXTURE, "gui/overlay/shuffle.png"));
     }
 
     @Override

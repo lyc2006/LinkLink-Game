@@ -74,6 +74,13 @@ public class GuiRenderer implements AutoCloseable {
         }
     }
 
+    public @NonNull GuiScreenSpace currentScreenSpace() {
+        if (currentScreenSpace == null) {
+            throw new IllegalStateException("currentScreenSpace is only available during renderScreen");
+        }
+        return currentScreenSpace;
+    }
+
     public void drawTexture(@NonNull ResourceLocation textureLocation,
             @NonNull GuiAnchor anchor,
             float offsetX,
