@@ -49,7 +49,7 @@ public class TotalBarRenderer implements IBarRenderer {
         // 计算能量百分比 (0 ~ 1)
         float percent = 0.0f;
         if (bar.maxEnergy() > 0) {
-            percent = Math.max(0.0f, Math.min(1.0f, (float) bar.currentEnergy() / (float) bar.maxEnergy()));
+            percent = clamp((float) bar.currentEnergy() / (float) bar.maxEnergy(), 0, 1);
         }
 
         // 绘制空背景（total_bar_empty）
@@ -72,5 +72,9 @@ public class TotalBarRenderer implements IBarRenderer {
                 .translate(0.0f, 1.0f - percent, 0.0f)
                 .scale(1.0f, percent, 1.0f);
         levelRenderer.drawTextureRegion(TOTAL_BAR_FULL, fullBarMatrix, 0.0f, 1.0f - percent, 1.0f, 1.0f);
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

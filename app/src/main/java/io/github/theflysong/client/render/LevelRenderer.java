@@ -24,12 +24,7 @@ import io.github.theflysong.util.SideOnly;
 public class LevelRenderer extends GuiRenderer {
     private final MapRenderer mapRenderer = new MapRenderer();
     private static final String TOTAL_BAR_ID = "total";
-    private static final float TOTAL_BAR_HEIGHT_RATIO = 0.90f;
-    private static final float TOTAL_BAR_WIDTH_RATIO = 0.22f;
-    private static final float TOTAL_BAR_MIN_WIDTH = 36.0f;
-    private static final float TOTAL_BAR_MAX_WIDTH = 84.0f;
-    private static final float TOTAL_BAR_MIN_HEIGHT = 180.0f;
-    private static final float TOTAL_BAR_MAX_HEIGHT = 560.0f;
+    private static final float TOTAL_BAR_ASPECT_WIDTH_OVER_HEIGHT = 0.25f; // 宽高比固定为 1:4
     private static final float TOTAL_BAR_MIN_MARGIN = 16.0f;
 
     public LevelRenderer(Renderer renderer) {
@@ -109,8 +104,8 @@ public class LevelRenderer extends GuiRenderer {
         float bottomPx = mapSpaceYToGui(bounds.bottom(), screenSpace.height());
 
         float mapHeightPx = Math.max(1.0f, bottomPx - topPx);
-        float barHeight = clamp(mapHeightPx * TOTAL_BAR_HEIGHT_RATIO, TOTAL_BAR_MIN_HEIGHT, TOTAL_BAR_MAX_HEIGHT);
-        float barWidth = clamp(barHeight * TOTAL_BAR_WIDTH_RATIO, TOTAL_BAR_MIN_WIDTH, TOTAL_BAR_MAX_WIDTH);
+        float barHeight = mapHeightPx;
+        float barWidth = barHeight * TOTAL_BAR_ASPECT_WIDTH_OVER_HEIGHT;
 
         float centerY = (topPx + bottomPx) * 0.5f;
         float margin = Math.max(TOTAL_BAR_MIN_MARGIN, barWidth * 0.3f);
@@ -120,7 +115,7 @@ public class LevelRenderer extends GuiRenderer {
         // 构造 modelMatrix：左上角为原点，局部空间为 [0, 1]^2
         return new Matrix4f()
                 .identity()
-            .translate(leftX, topY, 0.0f)
+                .translate(leftX, topY, 0.0f)
                 .scale(barWidth, barHeight, 1.0f);
     }
 
@@ -131,10 +126,6 @@ public class LevelRenderer extends GuiRenderer {
 
     private static float mapSpaceYToGui(float mapSpaceY, float screenHeight) {
         return (1.0f - mapSpaceY) * 0.5f * screenHeight;
-    }
-
-    private static float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
     }
 
     public MapRenderer mapRenderer() {
