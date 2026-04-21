@@ -1,4 +1,4 @@
-package io.github.theflysong.client.gl;
+package io.github.theflysong.client.window;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -41,6 +41,7 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
@@ -107,6 +108,24 @@ public class Window {
 
 	public int height() {
 		return height;
+	}
+
+	public static long currentHandle() {
+		return glfwGetCurrentContext();
+	}
+
+	public static CursorPosition cursorPosition(long windowHandle) {
+		double[] xPos = new double[1];
+		double[] yPos = new double[1];
+		glfwGetCursorPos(windowHandle, xPos, yPos);
+		return new CursorPosition(xPos[0], yPos[0]);
+	}
+
+	public static WindowSize windowSize(long windowHandle) {
+		int[] width = new int[1];
+		int[] height = new int[1];
+		glfwGetWindowSize(windowHandle, width, height);
+		return new WindowSize(width[0], height[0]);
 	}
 
 	/**
@@ -219,20 +238,5 @@ public class Window {
 		}
 	}
 
-	@FunctionalInterface
-	public interface MouseButtonCallback {
-		void onMouseButton(long window,
-							 double cursorX,
-							 double cursorY,
-							 int windowWidth,
-							 int windowHeight,
-							 int button,
-							 int action,
-							 int mods);
-	}
 
-	@FunctionalInterface
-	public interface WindowSizeCallback {
-		void onWindowSize(long window, int width, int height);
-	}
 }

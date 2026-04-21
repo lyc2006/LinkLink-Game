@@ -161,7 +161,7 @@ public class MapRenderer {
 		Layout layout = computeLayout(width, height);
 		renderCanvas(renderer, new Matrix4f(modelMatrix)
 				.scale(layout.canvasWidth, layout.canvasHeight, 1.0f));
-		renderRcDebugRect(renderer, modelMatrix);
+		// renderRcDebugRect(renderer, modelMatrix);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				Vector2f center = slotToRender(map, new Vector2i(x, y));

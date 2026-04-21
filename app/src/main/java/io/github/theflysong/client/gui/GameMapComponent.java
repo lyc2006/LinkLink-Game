@@ -17,7 +17,7 @@ import io.github.theflysong.level.GameLevel;
  * 地图组件：负责地图点击命中与输入归一化。
  */
 public final class GameMapComponent extends GuiComponent {
-    private static final boolean SHOW_HIT_RANGE = true;
+    private static final boolean SHOW_HIT_RANGE = false;
 
     private final GameLevel gameLevel;
     private final LevelRenderer levelRenderer;

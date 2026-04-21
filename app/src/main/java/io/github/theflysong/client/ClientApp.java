@@ -6,9 +6,9 @@ import org.jspecify.annotations.Nullable;
 
 import static io.github.theflysong.App.LOGGER;
 
-import io.github.theflysong.client.gl.Window;
 import io.github.theflysong.client.gl.mesh.GLGpuMesh;
 import io.github.theflysong.client.gl.shader.GLShaders;
+import io.github.theflysong.client.gui.ExampleScreen;
 import io.github.theflysong.client.gui.GuiScreenSpace;
 import io.github.theflysong.client.gui.LevelScreen;
 import io.github.theflysong.client.render.GemRenderer;
@@ -17,6 +17,7 @@ import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
+import io.github.theflysong.client.window.Window;
 import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.input.GameMapInputHandler;
 import io.github.theflysong.input.InputDispatcher;
@@ -43,6 +44,7 @@ public final class ClientApp {
     private final MapRenderer mapRenderer = new MapRenderer();
     private @Nullable LevelRenderer levelRenderer;
     private @Nullable LevelScreen levelScreen;
+    private @Nullable ExampleScreen exampleScreen;
     private GameLevel gameLevel;
     private @Nullable GLGpuMesh atlasDebugMesh;
     private final InputDispatcher inputDispatcher = new InputDispatcher();
@@ -77,6 +79,7 @@ public final class ClientApp {
         gameLevel = new GameLevel(new MapGenerator().generateHard());
         levelRenderer = new LevelRenderer(renderer);
         levelScreen = new LevelScreen(gameLevel, levelRenderer, gameMapInputHandler);
+        exampleScreen = new ExampleScreen();
         atlasDebugMesh = Sprites.CHIPPED_GEM.get().model().createGpuMesh();
         setupInputDispatcher();
         GameMap map = gameLevel.gameMap();
@@ -84,8 +87,8 @@ public final class ClientApp {
     }
 
     private void render() {
-        if (levelRenderer != null && levelScreen != null) {
-            levelRenderer.renderScreen(levelScreen);
+        if (levelRenderer != null && exampleScreen != null) {
+            levelRenderer.renderScreen(exampleScreen);
         }
     }
 
@@ -123,6 +126,10 @@ public final class ClientApp {
             levelScreen.close();
             levelScreen = null;
         }
+        if (exampleScreen != null) {
+            exampleScreen.close();
+            exampleScreen = null;
+        }
         if (levelRenderer != null) {
             levelRenderer.close();
             levelRenderer = null;
@@ -143,17 +150,17 @@ public final class ClientApp {
     }
 
     private boolean handleGuiLeftClick(MouseInputContext context) {
-        if (levelScreen == null) {
+        if (exampleScreen == null) {
             return false;
         }
-        return levelScreen.handleMouseClick(context);
+        return exampleScreen.handleMouseClick(context);
     }
 
     private void onWindowSize(long windowHandle, int windowWidth, int windowHeight) {
-        if (levelScreen == null) {
+        if (exampleScreen == null) {
             return;
         }
-        levelScreen.refreshLayout(GuiScreenSpace.fromViewportSize(windowWidth, windowHeight));
+        exampleScreen.refreshLayout(GuiScreenSpace.fromViewportSize(windowWidth, windowHeight));
     }
 
     private void onMouseButton(long windowHandle,
