@@ -17,7 +17,7 @@ import io.github.theflysong.util.Side;
  */
 public class GemExquisite extends Gem {
     public GemExquisite() {
-        super(50);
+        super(50, 80);
     }
     
     @Override

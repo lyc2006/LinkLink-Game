@@ -15,12 +15,15 @@ public class User {
     private String username;
     private String passwordHash;
     private int uid;
+    private int score;
     private boolean isGuest;
     private GameMap gameMap;
     private String savedLevelId;
     private int savedEnergy;
     private long lastSaveTime;
+    private long savedTime;
     private static int Uid = 1;
+
 
     public User(String username, String passwordHash, boolean isGuest) {
         this.username = username;
@@ -105,9 +108,24 @@ public class User {
     public static int getUidCounter() {
         return Uid;
     }
+    public int getScore() {
+        return score;
+    }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
     public static void setUidCounter(int value) {
         Uid = value;
+    }
+
+
+    public long getSavedTime() {
+        return savedTime;
+    }
+
+    public void setSavedTime(long savedTime) {
+        this.savedTime = savedTime;
     }
 
     public JsonObject toJson() {
@@ -115,10 +133,12 @@ public class User {
         obj.addProperty("username", username);
         obj.addProperty("passwordHash", passwordHash != null ? passwordHash : "");
         obj.addProperty("uid", uid);
+        obj.addProperty("score", score);
         obj.addProperty("isGuest", isGuest);
         obj.addProperty("savedLevelId", savedLevelId != null ? savedLevelId : "");
         obj.addProperty("savedEnergy", savedEnergy);
         obj.addProperty("lastSaveTime", lastSaveTime);
+        obj.addProperty("savedTime", savedTime);
         if (gameMap != null) {
             obj.add("gameMap", gameMap.toJson());
         }
@@ -132,11 +152,13 @@ public class User {
         User user = new User(username, isGuest);
         user.setPasswordHash(passwordHash);
         user.setUid(obj.get("uid").getAsInt());
+        user.setScore(obj.get("score").getAsInt());
         if (obj.has("savedLevelId")) {
             user.setSavedLevelId(obj.get("savedLevelId").getAsString());
         }
         user.setSavedEnergy(obj.get("savedEnergy").getAsInt());
         user.setLastSaveTime(obj.get("lastSaveTime").getAsLong());
+        user.setSavedTime(obj.get("savedTime").getAsLong());
         if (obj.has("gameMap") && !obj.get("gameMap").isJsonNull()) {
             user.setGameMap(GameMap.fromJson(obj.getAsJsonObject("gameMap")));
         }

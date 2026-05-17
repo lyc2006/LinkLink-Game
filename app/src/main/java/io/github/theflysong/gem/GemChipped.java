@@ -10,7 +10,7 @@ import io.github.theflysong.level.GameLevel;
  */
 public class GemChipped extends Gem {
     public GemChipped() {
-        super(5);
+        super(5, 10);
     }
     
     @Override

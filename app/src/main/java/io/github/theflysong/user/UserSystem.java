@@ -101,7 +101,7 @@ public class UserSystem {
         return currentUser;
     }
 
-    public void saveGame(GameMap gameMap, String levelId, int energy) {
+    public void saveGame(GameMap gameMap, String levelId, int energy, int sorce, long elapsedTime) {
         if (currentUser == null || currentUser.isGuest()) {
             return;
         }
@@ -109,6 +109,8 @@ public class UserSystem {
         currentUser.setSavedLevelId(levelId);
         currentUser.setSavedEnergy(energy);
         currentUser.setLastSaveTime(System.currentTimeMillis());
+        currentUser.setScore(sorce);
+        currentUser.setSavedTime(elapsedTime);
         users.put(currentUser.getUsername(), currentUser);
         persist();
         LOGGER.info("Game saved for user: {}", currentUser.getUsername());
@@ -129,6 +131,14 @@ public class UserSystem {
         return currentUser != null ? currentUser.getSavedEnergy() : 0;
     }
 
+    public int getSavedScore() {
+        return currentUser != null ? currentUser.getScore() : 0;
+    }
+
+    public long getSavedTime() {
+        return currentUser != null ? currentUser.getSavedTime() : 0L;
+    }
+
     public boolean hasSave() {
         return currentUser != null && currentUser.hasSave();
     }
@@ -139,6 +149,8 @@ public class UserSystem {
             currentUser.setSavedLevelId(null);
             currentUser.setSavedEnergy(0);
             currentUser.setLastSaveTime(0);
+            currentUser.setScore(0);
+            currentUser.setSavedTime(0);
             users.put(currentUser.getUsername(), currentUser);
             persist();
             LOGGER.info("Save cleared for user: {}", currentUser.getUsername());
@@ -169,7 +181,7 @@ public class UserSystem {
                 LOGGER.info("Loaded {} users from {} (nextUid={})", users.size(), dataPath, dataFile.getUid());
                 for (Map.Entry<String, User> entry : users.entrySet()) {
                     User u = entry.getValue();
-                    LOGGER.info("  User '{}' (uid={}): hasSave={}, gameMap={}",
+                    LOGGER.info("  User '{}' (uid={}): hasSave={}, gameMap={}, score={}",
                         u.getUsername(), u.getUid(), u.hasSave(),
                         u.getGameMap() != null ? u.getGameMap().getClass().getSimpleName() : "null");
                 }

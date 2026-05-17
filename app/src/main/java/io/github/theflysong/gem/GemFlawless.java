@@ -10,7 +10,7 @@ import io.github.theflysong.level.GameLevel;
  */
 public class GemFlawless extends Gem {
     public GemFlawless() {
-        super(30);
+        super(30, 50);
     }
     
     @Override

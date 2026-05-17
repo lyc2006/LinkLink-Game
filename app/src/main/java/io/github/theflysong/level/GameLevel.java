@@ -25,14 +25,69 @@ import io.github.theflysong.level.TipResult;
  * @date 2026年4月16日
  */
 public class GameLevel {
+    private static final long COMBO_WINDOW_NANOS = 1_500_000_000L;
+
     private final GameMap gameMap;
     private final EnergyBar energyBar;
     private TipResult lastAllTipResult = TipResult.noTip();
     private Vector4i lastTippedCell = null;
+    private int score = 0;
+    private long levelStartTime = 0;
+    private long lastMatchTime = 0;
+    private int comboCount = 0;
+    private long pauseStartNanos = 0;
 
     public GameLevel(GameMap gameMap) {
         this.gameMap = Objects.requireNonNull(gameMap, "gameMap must not be null");
         this.energyBar = Objects.requireNonNull(Bars.TOTAL.get(), "energyBar must not be null");
+    }
+
+    public void startLevel() {
+        levelStartTime = System.nanoTime();
+        lastMatchTime = 0;
+        comboCount = 0;
+        pauseStartNanos = 0;
+    }
+
+    public void pauseLevel() {
+        if (pauseStartNanos == 0) {
+            pauseStartNanos = System.nanoTime();
+        }
+    }
+
+    public void resumeLevel() {
+        if (pauseStartNanos != 0) {
+            long pauseDuration = System.nanoTime() - pauseStartNanos;
+            levelStartTime += pauseDuration;
+            if (lastMatchTime > 0) {
+                lastMatchTime += pauseDuration;
+            }
+            pauseStartNanos = 0;
+        }
+    }
+
+    public int score() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+    
+    public void setElapsedSeconds(long seconds) {
+        this.levelStartTime = System.nanoTime() - seconds * 1_000_000_000L;
+    }
+
+    public long elapsedSeconds() {
+        if (levelStartTime == 0) {
+            return 0;
+        }
+        long now = pauseStartNanos != 0 ? pauseStartNanos : System.nanoTime();
+        return (now - levelStartTime) / 1_000_000_000;
+    }
+
+    public int comboCount() {
+        return comboCount;
     }
 
     public GameMap gameMap() {
@@ -173,6 +228,25 @@ public class GameLevel {
     public MatchResult tryMatch(Vector2i srcPos, Vector2i dstPos) {
         MatchResult result = isMatch(srcPos, dstPos);
         if (result.isMatch()) {
+            GemInstance srcGem = gameMap.gemAt(srcPos);
+            GemInstance dstGem = gameMap.gemAt(dstPos);
+            int baseScore = 0;
+            if (srcGem != null) baseScore += srcGem.gem().scoreValue();
+            if (dstGem != null) baseScore += dstGem.gem().scoreValue();
+
+            long now = System.nanoTime();
+            if (lastMatchTime > 0 && (now - lastMatchTime) < COMBO_WINDOW_NANOS) {
+                comboCount++;
+            } else {
+                comboCount = 0;
+            }
+            lastMatchTime = now;
+
+            score += baseScore;
+            if (comboCount > 0) {
+                score += (int) (comboCount * baseScore * 0.7);
+            }
+
             destroyGemAt(srcPos);
             destroyGemAt(dstPos);
             if (isCurrentTip(lastTippedCell, srcPos) || isCurrentTip(lastTippedCell, dstPos)) {
@@ -246,4 +320,5 @@ public class GameLevel {
         setLastTipResult(TipResult.noTip());
         setLastTippedCell(null);
     }
+
 }

@@ -10,7 +10,7 @@ import io.github.theflysong.level.GameLevel;
  */
 public class GemFlawed extends Gem {
     public GemFlawed() {
-        super(10);
+        super(10, 20);
     }
     
     @Override

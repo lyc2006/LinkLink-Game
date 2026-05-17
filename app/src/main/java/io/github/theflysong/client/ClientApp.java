@@ -323,6 +323,7 @@ public final class ClientApp {
     private void startGame() {
         userSystem.clearSave();
         createGameLevel(selectedLevelId);
+        gameLevel.startLevel();
         resumeGame();
     }
 
@@ -406,6 +407,7 @@ public final class ClientApp {
             return;
         }
         if (gameLevel != null) {
+            gameLevel.resumeLevel();
             screenState = ScreenState.PLAYING;
             activeScreen = levelScreen;
             return;
@@ -415,6 +417,9 @@ public final class ClientApp {
             if (savedMap != null) {
                 gameLevel = new GameLevel(savedMap);
                 gameLevel.energyBar().setEnergy(userSystem.getSavedEnergy());
+                gameLevel.startLevel();
+                gameLevel.setScore(userSystem.getSavedScore());
+                gameLevel.setElapsedSeconds(userSystem.getSavedTime());
                 selectedLevelId = userSystem.getSavedLevelId();
                 levelScreen = new LevelScreen(gameLevel, levelRenderer, gameMapInputHandler);
                 screenState = ScreenState.PLAYING;
@@ -425,9 +430,11 @@ public final class ClientApp {
         }
         if (savedGameLevel != null) {
             gameLevel = cloneGameLevel(savedGameLevel);
+            gameLevel.startLevel();
             levelScreen = new LevelScreen(gameLevel, levelRenderer, gameMapInputHandler);
             screenState = ScreenState.PLAYING;
             activeScreen = levelScreen;
+            return;
         }
     }
 
@@ -437,12 +444,14 @@ public final class ClientApp {
         }
         screenState = ScreenState.PAUSED;
         activeScreen = pauseMenuScreen;
+        gameLevel.pauseLevel();
     }
 
     private void resumeGame() {
-        if (gameLevel == null || levelScreen == null) {
+        if (gameLevel == null || levelScreen == null || savedGameLevel != null) {
             return;
         }
+        gameLevel.resumeLevel();
         screenState = ScreenState.PLAYING;
         activeScreen = levelScreen;
     }
@@ -490,7 +499,9 @@ public final class ClientApp {
             userSystem.saveGame(
                 gameLevel.gameMap(),
                 selectedLevelId,
-                gameLevel.energyBar().currentEnergy()
+                gameLevel.energyBar().currentEnergy(),
+                gameLevel.score(),
+                gameLevel.elapsedSeconds()
             );
         }
         updateMenuState();

@@ -18,13 +18,23 @@ import io.github.theflysong.util.SideOnly;
  */
 public class Gem {
     protected int energyValue = 0;
+    protected int scoreValue = 0;
+
+    public Gem(int energyValue, int scoreValue) {
+        this.energyValue = energyValue;
+        this.scoreValue = scoreValue;
+    }
 
     public Gem(int energyValue) {
-        this.energyValue = energyValue;
+        this(energyValue, energyValue);
     }
 
     public Gem() {
-        this(20);
+        this(20, 30);
+    }
+
+    public int scoreValue() {
+        return scoreValue;
     }
 
     public void onSpawn(/* Game game, */ GameLevel level, GemInstance instance) {}

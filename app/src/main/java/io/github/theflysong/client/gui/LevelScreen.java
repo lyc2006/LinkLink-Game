@@ -128,6 +128,25 @@ public final class LevelScreen extends GuiScreen {
                 renderer.drawTexture(PASS_TEXTURE, passModel);
             }
         }, 1);
+
+        addComponent(new GuiComponent(GuiAnchor.RIGHT, -100.0f, -450.0f, 260.0f, 80.0f) {
+            @Override
+            protected void renderComponent(GuiRenderer renderer, Matrix4f modelMatrix) {
+                long elapsed = gameLevel.elapsedSeconds();
+                String timeStr = String.format("%02d:%02d", elapsed / 60, elapsed % 60);
+                String scoreStr = "得分: " + gameLevel.score();
+
+                Matrix4f scoreModel = renderer.componentChildMatrix(modelMatrix, width(), height(),
+                        0.0f, -height() * 0.22f, width(), height() * 0.38f, 0.0f);
+                renderer.drawText(scoreStr, null, scoreModel, width(), height() * 0.38f, 0.0f,
+                        TextStyle.normal().withColor(1.0f, 0.85f, 0.2f, 1.0f));
+
+                Matrix4f timeModel = renderer.componentChildMatrix(modelMatrix, width(), height(),
+                        0.0f, height() * 0.22f, width(), height() * 0.38f, 0.0f);
+                renderer.drawText(timeStr, null, timeModel, width(), height() * 0.38f, 0.0f,
+                        TextStyle.normal().withColor(1.0f, 1.0f, 1.0f, 1.0f));
+            }
+        }, 200);
     }
 
     @Override
