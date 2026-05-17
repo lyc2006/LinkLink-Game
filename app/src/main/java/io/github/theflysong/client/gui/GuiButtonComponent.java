@@ -1,5 +1,6 @@
 package io.github.theflysong.client.gui;
 
+import io.github.theflysong.client.audio.AudioManager;
 import io.github.theflysong.client.window.CursorPosition;
 import io.github.theflysong.client.window.Window;
 import io.github.theflysong.client.window.WindowSize;
@@ -113,6 +114,7 @@ public final class GuiButtonComponent extends GuiComponent {
 
     private boolean handleInternalClick(@NonNull GuiComponent component, @NonNull MouseInputContext context) {
         readyUntilNanos = System.nanoTime() + readyHoldNanos;
+        AudioManager.playSfx(AudioManager.BUTTON_UP);
         if (userOnClick == null) {
             return true;
         }

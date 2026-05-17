@@ -28,6 +28,7 @@ dependencies {
     implementation libs.lwjgl.glfw
     implementation libs.lwjgl.opengl
     implementation libs.lwjgl.stb
+    implementation libs.lwjgl.openal
     implementation libs.joml
     implementation libs.gson
     implementation libs.jspecify
@@ -39,6 +40,7 @@ dependencies {
     runtimeOnly(variantOf(libs.lwjgl.glfw) { classifier('natives-windows') })
     runtimeOnly(variantOf(libs.lwjgl.opengl) { classifier('natives-windows') })
     runtimeOnly(variantOf(libs.lwjgl.stb) { classifier('natives-windows') })
+    runtimeOnly(variantOf(libs.lwjgl.openal) { classifier('natives-windows') })
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
