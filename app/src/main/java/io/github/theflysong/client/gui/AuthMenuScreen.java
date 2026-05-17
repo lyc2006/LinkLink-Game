@@ -23,6 +23,7 @@ public final class AuthMenuScreen extends GuiScreen {
     private final Runnable onRegister;
     private final Runnable onGuest;
     private final Runnable onExit;
+    private String warningMessage;
 
     public AuthMenuScreen(@NonNull Runnable onLogin,
                           @NonNull Runnable onRegister,
@@ -32,6 +33,10 @@ public final class AuthMenuScreen extends GuiScreen {
         this.onRegister = onRegister;
         this.onGuest = onGuest;
         this.onExit = onExit;
+    }
+
+    public void setWarningMessage(String message) {
+        this.warningMessage = message;
     }
 
     @Override
@@ -44,7 +49,14 @@ public final class AuthMenuScreen extends GuiScreen {
         addComponent(createMenuButton("登录", -120.0f, onLogin), 1);
         addComponent(createMenuButton("注册", -40.0f, onRegister), 1);
         addComponent(createMenuButton("游客模式", 40.0f, onGuest), 1);
-        addComponent(createMenuButton("退出游戏", 160.0f, onExit), 1);
+        addComponent(createMenuButton("退出游戏", 120.0f, onExit), 1);
+
+        if (warningMessage != null) {
+            addComponent(new GuiTextComponent(warningMessage, null,
+                    GuiAnchor.CENTER, 0.0f, 200.0f,
+                    TextStyle.normal().withBold(true)
+                            .withColor(new Vector4f(1.0f, 0.75f, 0.3f, 1.0f))), 1);
+        }
 
         setMaxLayer(2);
     }

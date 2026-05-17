@@ -2,6 +2,9 @@ package io.github.theflysong.user;
 
 import static io.github.theflysong.App.LOGGER;
 
+import io.github.theflysong.client.gui.GuiAnchor;
+import io.github.theflysong.client.gui.GuiTextComponent;
+import io.github.theflysong.client.gui.TextStyle;
 import io.github.theflysong.level.GameMap;
 
 import com.google.gson.Gson;
@@ -17,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Vector4f;
+
 /**
  * 用户系统 — 管理注册、登录、游客模式及存档读写
  *
@@ -31,6 +36,7 @@ public class UserSystem {
     private final Path dataPath;
     private Map<String, User> users;
     private User currentUser;
+    private boolean loadCorrupted;
 
     public UserSystem() {
         this.dataPath = Paths.get(DATA_DIR, DATA_FILE);
@@ -127,8 +133,24 @@ public class UserSystem {
         return currentUser != null && currentUser.hasSave();
     }
 
+    public void clearSave() {
+        if (currentUser != null && currentUser.hasSave()) {
+            currentUser.setGameMap(null);
+            currentUser.setSavedLevelId(null);
+            currentUser.setSavedEnergy(0);
+            currentUser.setLastSaveTime(0);
+            users.put(currentUser.getUsername(), currentUser);
+            persist();
+            LOGGER.info("Save cleared for user: {}", currentUser.getUsername());
+        }
+    }
+
     public boolean isUsernameTaken(String username) {
         return users.containsKey(username);
+    }
+
+    public boolean isLoadCorrupted() {
+        return loadCorrupted;
     }
 
     private void load() {
@@ -153,6 +175,7 @@ public class UserSystem {
                 }
                 return;
             } catch (Exception e) {
+                loadCorrupted = true;
                 LOGGER.error("Failed to load user data, starting fresh", e);
             }
         } else {

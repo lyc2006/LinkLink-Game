@@ -110,7 +110,10 @@ public final class ClientApp {
                 this::openLogin,
                 this::openRegister,
                 this::loginAsGuest,
-                this::exitGame);
+                this::onExit);
+        if (userSystem.isLoadCorrupted()) {
+            authMenuScreen.setWarningMessage("存档数据已损坏");
+        }
         activeScreen = authMenuScreen;
         screenState = ScreenState.AUTH;
         setupInputDispatcher();
@@ -314,6 +317,7 @@ public final class ClientApp {
     }
 
     private void startGame() {
+        userSystem.clearSave();
         createGameLevel(selectedLevelId);
         resumeGame();
     }
@@ -331,6 +335,13 @@ public final class ClientApp {
         screenState = ScreenState.AUTH;
         activeScreen = loginScreen;
     }
+
+    private void onExit() {
+        long handle = Window.currentHandle();
+        if(handle != 0){
+            glfwSetWindowShouldClose(handle, true);
+        }
+    }   
 
     private void openRegister() {
         if (registerScreen == null) {
@@ -351,7 +362,7 @@ public final class ClientApp {
             mainMenuScreen = new MainMenuScreen(
                     this::startGame,
                     this::continueGame,
-                    this::exitGame,
+                    this::backToLogin,
                     this::PKGame,
                     this::selectLevel,
                     this::selectedLevelLabel);
@@ -372,7 +383,7 @@ public final class ClientApp {
             return;
         }
         // AuthMenuScreen: ESC exits game
-        exitGame();
+        backToLogin();
     }
 
     private void updateUserDisplay() {
@@ -432,11 +443,21 @@ public final class ClientApp {
         activeScreen = levelScreen;
     }
 
-    private void exitGame() {
-        long handle = Window.currentHandle();
-        if (handle != 0L) {
-            glfwSetWindowShouldClose(handle, true);
+    private void backToLogin() {
+        userSystem.logout();
+        if (gameLevel != null) {
+            gameLevel = null;
         }
+        if (levelScreen != null) {
+            levelScreen.close();
+            levelScreen = null;
+        }
+        if (mainMenuScreen != null) {
+            mainMenuScreen.setContinueEnabled(false);
+            mainMenuScreen.setCurrentUser("游客");
+        }
+        screenState = ScreenState.AUTH;
+        activeScreen = authMenuScreen;
     }
 
     private void quitToMainMenu() {
@@ -450,6 +471,7 @@ public final class ClientApp {
             return;
         }
         gameLevel = new GameLevel(MapGenerator.generate(levelId));
+        gameLevel.energyBar().setEnergy(0);
         levelScreen = new LevelScreen(gameLevel, levelRenderer, gameMapInputHandler);
         selectedLevelId = levelId;
         updateMenuState();

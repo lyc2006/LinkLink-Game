@@ -21,7 +21,7 @@ public final class MainMenuScreen extends GuiScreen {
 
     private final Runnable onStart;
     private final Runnable onContinue;
-    private final Runnable onExitApp;
+    private final Runnable onBackLogin;
     private final Runnable onPK;
     private final Consumer<String> onSelectLevel;
     private final Supplier<String> selectedLevelLabelSupplier;
@@ -30,16 +30,17 @@ public final class MainMenuScreen extends GuiScreen {
     private GuiTextComponent selectedLevelText;
     private GuiTextComponent userStatusText;
     private String selectedLevelId;
+    private String currentUser = "";
 
     public MainMenuScreen(@NonNull Runnable onStart,
                           @NonNull Runnable onContinue,
-                          @NonNull Runnable onExitApp,
+                          @NonNull Runnable onBackLogin,
                           @NonNull Runnable onPK,
                           @NonNull Consumer<String> onSelectLevel,
                           @NonNull Supplier<String> selectedLevelLabelSupplier) {
         this.onStart = onStart;
         this.onContinue = onContinue;
-        this.onExitApp = onExitApp;
+        this.onBackLogin = onBackLogin;
         this.onPK = onPK;
         this.onSelectLevel = onSelectLevel;
         this.selectedLevelLabelSupplier = selectedLevelLabelSupplier;
@@ -61,14 +62,14 @@ public final class MainMenuScreen extends GuiScreen {
         continueButton = addComponent(createMenuButton("继续游戏", -60.0f, () -> onContinue.run()));
         addComponent(createMenuButton("关卡选择", 20.0f, () -> selectLevel(selectedLevelId)));
         addComponent(createMenuButton("对战模式", 100.0f, () -> onPK.run()));
-        addComponent(createMenuButton("退出游戏", 180.0f, () -> onExitApp.run()));
+        addComponent(createMenuButton("返回登录", 180.0f, () -> onBackLogin.run()));
 
         userStatusText = addComponent(new GuiTextComponent(
-                "",
+                "当前用户：" + currentUser,
                 null,
                 GuiAnchor.CENTER,
                 0.0f,
-                260.0f,
+                -260.0f,
                 TextStyle.normal().withColor(new Vector4f(0.7f, 0.75f, 0.8f, 1.0f))));
     }
 
@@ -84,6 +85,7 @@ public final class MainMenuScreen extends GuiScreen {
     }
 
     public void setCurrentUser(String userName) {
+        currentUser = userName;
         if (userStatusText != null) {
             userStatusText.setText("当前用户：" + userName);
         }

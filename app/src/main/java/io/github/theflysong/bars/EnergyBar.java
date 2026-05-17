@@ -22,6 +22,11 @@ public abstract class EnergyBar {
         this.effectCount = 0;
     }
 
+    public void setEnergy(int count) {
+        this.effectCount = Math.max(0, Math.min(count, maxEffectCount));
+        System.out.println("EnergyBar set: " + effectCount + "/" + maxEffectCount);
+    }
+
     public void chargeEnergy(int count) {
         effectCount = Math.min(effectCount + count, maxEffectCount);
         System.out.println("EnergyBar charged: " + effectCount + "/" + maxEffectCount);
