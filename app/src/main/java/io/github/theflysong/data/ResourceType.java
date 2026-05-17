@@ -24,6 +24,8 @@ public class ResourceType {
     public static final ResourceType VERTEX_LAYOUT = of("assets", "vertexlayout");
     public static final ResourceType MODEL = of("assets", "model");
     public static final ResourceType SPRITE = of("assets", "sprite");
+    public static final ResourceType SOUND = of("assets", "sound");
+    public static final ResourceType MUSIC = of("assets", "music");
     public static final ResourceType TEXT = of("data", "text");
     public static final ResourceType LEVEL = of("data", "level");
 

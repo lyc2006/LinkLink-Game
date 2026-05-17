@@ -26,6 +26,7 @@ import io.github.theflysong.client.render.MapRenderer;
 import io.github.theflysong.client.render.Renderer;
 import io.github.theflysong.client.sprite.Models;
 import io.github.theflysong.client.sprite.Sprites;
+import io.github.theflysong.client.audio.AudioManager;
 import io.github.theflysong.client.window.Window;
 import io.github.theflysong.event.InitializationEvent;
 import io.github.theflysong.input.GameMapInputHandler;
@@ -114,10 +115,12 @@ public final class ClientApp {
         activeScreen = authMenuScreen;
         screenState = ScreenState.AUTH;
         setupInputDispatcher();
+        AudioManager.playMusic(AudioManager.TITLE_MUSIC);
         LOGGER.info("Client initialization completed: auth screen ready");
     }
 
     private void render() {
+        AudioManager.update();
         if (levelRenderer == null) {
             return;
         }
@@ -198,6 +201,7 @@ public final class ClientApp {
             levelScreen.close();
             levelScreen = null;
         }
+        AudioManager.shutdown();
         if (levelRenderer != null) {
             levelRenderer.close();
             levelRenderer = null;

@@ -24,16 +24,18 @@ public abstract class EnergyBar {
 
     public void chargeEnergy(int count) {
         effectCount = Math.min(effectCount + count, maxEffectCount);
-        System.out.println("EnergyBar charged: " + effectCount + "/" + maxEffectCount);
     }
 
     public boolean useEnergy(int count) {
         if (effectCount >= count) {
             effectCount = Math.max(effectCount - count, 0);
-            System.out.println("EnergyBar used: " + effectCount + "/" + maxEffectCount);
             return true;
         }
         return false;
+    }
+
+    public void setEnergy(int count) {
+        effectCount = Math.max(0, Math.min(count, maxEffectCount));
     }
 
     public int currentEnergy() {
