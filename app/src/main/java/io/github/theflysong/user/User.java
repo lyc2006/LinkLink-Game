@@ -2,7 +2,11 @@ package io.github.theflysong.user;
 
 import io.github.theflysong.level.GameMap;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户实体 — 包含身份信息和存档数据
@@ -22,6 +26,7 @@ public class User {
     private int savedEnergy;
     private long lastSaveTime;
     private long savedTime;
+    private List<String> completedLevels = new ArrayList<>();
     private static int Uid = 1;
 
 
@@ -128,6 +133,20 @@ public class User {
         this.savedTime = savedTime;
     }
 
+    public List<String> getCompletedLevels() {
+        return completedLevels;
+    }
+
+    public void addCompletedLevel(String levelId) {
+        if (!completedLevels.contains(levelId)) {
+            completedLevels.add(levelId);
+        }
+    }
+
+    public boolean isLevelCompleted(String levelId) {
+        return completedLevels.contains(levelId);
+    }
+
     public JsonObject toJson() {
         JsonObject obj = new JsonObject();
         obj.addProperty("username", username);
@@ -139,6 +158,11 @@ public class User {
         obj.addProperty("savedEnergy", savedEnergy);
         obj.addProperty("lastSaveTime", lastSaveTime);
         obj.addProperty("savedTime", savedTime);
+        JsonArray completedArr = new JsonArray();
+        for (String levelId : completedLevels) {
+            completedArr.add(levelId);
+        }
+        obj.add("completedLevels", completedArr);
         if (gameMap != null) {
             obj.add("gameMap", gameMap.toJson());
         }
@@ -159,6 +183,12 @@ public class User {
         user.setSavedEnergy(obj.get("savedEnergy").getAsInt());
         user.setLastSaveTime(obj.get("lastSaveTime").getAsLong());
         user.setSavedTime(obj.get("savedTime").getAsLong());
+        if (obj.has("completedLevels") && !obj.get("completedLevels").isJsonNull()) {
+            JsonArray completedArr = obj.getAsJsonArray("completedLevels");
+            for (int i = 0; i < completedArr.size(); i++) {
+                user.addCompletedLevel(completedArr.get(i).getAsString());
+            }
+        }
         if (obj.has("gameMap") && !obj.get("gameMap").isJsonNull()) {
             user.setGameMap(GameMap.fromJson(obj.getAsJsonObject("gameMap")));
         }

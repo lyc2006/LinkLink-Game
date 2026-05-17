@@ -161,6 +161,23 @@ public class UserSystem {
         return users.containsKey(username);
     }
 
+    public void markLevelCompleted(String levelId) {
+        if (currentUser == null || currentUser.isGuest()) {
+            return;
+        }
+        currentUser.addCompletedLevel(levelId);
+        users.put(currentUser.getUsername(), currentUser);
+        persist();
+        LOGGER.info("Level '{}' marked completed for user: {}", levelId, currentUser.getUsername());
+    }
+
+    public boolean isLevelCompleted(String levelId) {
+        if (currentUser == null) {
+            return false;
+        }
+        return currentUser.isLevelCompleted(levelId);
+    }
+
     public boolean isLoadCorrupted() {
         return loadCorrupted;
     }

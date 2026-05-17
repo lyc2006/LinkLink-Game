@@ -1,14 +1,10 @@
 package io.github.theflysong.client.gui;
 
-import io.github.theflysong.client.window.Window;
 import io.github.theflysong.data.ResourceLocation;
 import io.github.theflysong.data.ResourceType;
-import io.github.theflysong.input.MouseInputContext;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class MainMenuScreen extends GuiScreen {
@@ -23,20 +19,19 @@ public final class MainMenuScreen extends GuiScreen {
     private final Runnable onContinue;
     private final Runnable onBackLogin;
     private final Runnable onPK;
-    private final Consumer<String> onSelectLevel;
+    private final Runnable onSelectLevel;
     private final Supplier<String> selectedLevelLabelSupplier;
 
     private GuiButtonComponent continueButton;
     private GuiTextComponent selectedLevelText;
     private GuiTextComponent userStatusText;
-    private String selectedLevelId;
     private String currentUser = "";
 
     public MainMenuScreen(@NonNull Runnable onStart,
                           @NonNull Runnable onContinue,
                           @NonNull Runnable onBackLogin,
                           @NonNull Runnable onPK,
-                          @NonNull Consumer<String> onSelectLevel,
+                          @NonNull Runnable onSelectLevel,
                           @NonNull Supplier<String> selectedLevelLabelSupplier) {
         this.onStart = onStart;
         this.onContinue = onContinue;
@@ -44,7 +39,6 @@ public final class MainMenuScreen extends GuiScreen {
         this.onPK = onPK;
         this.onSelectLevel = onSelectLevel;
         this.selectedLevelLabelSupplier = selectedLevelLabelSupplier;
-        this.selectedLevelId = "simple";
     }
 
     @Override
@@ -60,7 +54,7 @@ public final class MainMenuScreen extends GuiScreen {
 
         addComponent(createMenuButton("开始游戏", -140.0f, () -> onStart.run()));
         continueButton = addComponent(createMenuButton("继续游戏", -60.0f, () -> onContinue.run()));
-        addComponent(createMenuButton("关卡选择", 20.0f, () -> selectLevel(selectedLevelId)));
+        addComponent(createMenuButton("关卡选择", 20.0f, () -> onSelectLevel.run()));
         addComponent(createMenuButton("对战模式", 100.0f, () -> onPK.run()));
         addComponent(createMenuButton("返回登录", 180.0f, () -> onBackLogin.run()));
 
@@ -75,7 +69,7 @@ public final class MainMenuScreen extends GuiScreen {
 
     @Override
     protected void renderScreen(GuiRenderer renderer) {
-        // selectedLevelText.setText("当前关卡：" + selectedLevelLabelSupplier.get());
+        selectedLevelText.setText("当前关卡：" + selectedLevelLabelSupplier.get());
     }
 
     public void setContinueEnabled(boolean enabled) {
@@ -109,10 +103,5 @@ public final class MainMenuScreen extends GuiScreen {
             renderer.drawText(label, null, modelMatrix, component.width(), component.height(), localZ + 0.001f,
                 TextStyle.normal().withBold(true).withColor(new Vector4f(1.0f, 1.0f, 1.0f, 1.0f))));
         return button;
-    }
-
-    private void selectLevel(String levelId) {
-        this.selectedLevelId = levelId;
-        onSelectLevel.accept(levelId);
     }
 }

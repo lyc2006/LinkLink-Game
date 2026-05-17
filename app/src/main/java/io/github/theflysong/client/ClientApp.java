@@ -15,6 +15,7 @@ import io.github.theflysong.client.gl.shader.GLShaders;
 import io.github.theflysong.client.gui.GuiScreen;
 import io.github.theflysong.client.gui.GuiScreenSpace;
 import io.github.theflysong.client.gui.AuthMenuScreen;
+import io.github.theflysong.client.gui.ChoseLevelScreen;
 import io.github.theflysong.client.gui.LoginScreen;
 import io.github.theflysong.client.gui.RegisterScreen;
 import io.github.theflysong.client.gui.LevelScreen;
@@ -53,7 +54,8 @@ public final class ClientApp {
         MAIN_MENU,
         PLAYING,
         PAUSED,
-        AUTH
+        AUTH,
+        LEVEL_SELECT
     }
 
     @NonNull
@@ -70,12 +72,14 @@ public final class ClientApp {
     private @Nullable AuthMenuScreen authMenuScreen;
     private @Nullable LoginScreen loginScreen;
     private @Nullable RegisterScreen registerScreen;
+    private @Nullable ChoseLevelScreen choseLevelScreen;
+    private boolean levelCompletionMarked;
     private @Nullable GLGpuMesh atlasDebugMesh;
     private final InputDispatcher inputDispatcher = new InputDispatcher();
     private final GameMapInputHandler gameMapInputHandler = new GameMapInputHandler(() -> gameLevel, mapRenderer);
     private UserSystem userSystem;
     private ScreenState screenState = ScreenState.MAIN_MENU;
-    private String selectedLevelId = "hard";
+    private String selectedLevelId = "preset";
 
     public void run() {
         LOGGER.info("Creating window: {}x{}, title={}", (int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE);
@@ -147,6 +151,17 @@ public final class ClientApp {
             if (activeScreen != null) {
                 levelRenderer.renderScreen(activeScreen);
             }
+        } else if (screenState == ScreenState.LEVEL_SELECT) {
+            if (choseLevelScreen != null) {
+                levelRenderer.renderScreen(choseLevelScreen);
+            }
+        }
+
+        if (screenState == ScreenState.PLAYING && gameLevel != null && gameLevel.isGameOver() && !levelCompletionMarked) {
+            levelCompletionMarked = true;
+            if (!userSystem.isGuest()) {
+                userSystem.markLevelCompleted(selectedLevelId);
+            }
         }
     }
 
@@ -200,6 +215,10 @@ public final class ClientApp {
             registerScreen.close();
             registerScreen = null;
         }
+        if (choseLevelScreen != null) {
+            choseLevelScreen.close();
+            choseLevelScreen = null;
+        }
         if (levelScreen != null) {
             levelScreen.close();
             levelScreen = null;
@@ -225,6 +244,9 @@ public final class ClientApp {
     }
 
     private boolean handleGuiLeftClick(MouseInputContext context) {
+        if (screenState == ScreenState.LEVEL_SELECT && choseLevelScreen != null) {
+            return choseLevelScreen.handleMouseClick(context);
+        }
         if (activeScreen != null) {
             return activeScreen.handleMouseClick(context);
         }
@@ -250,6 +272,9 @@ public final class ClientApp {
         }
         if (registerScreen != null) {
             registerScreen.refreshLayout(screenSpace);
+        }
+        if (choseLevelScreen != null) {
+            choseLevelScreen.refreshLayout(screenSpace);
         }
     }
 
@@ -308,6 +333,8 @@ public final class ClientApp {
                 pauseGame();
             } else if (screenState == ScreenState.PAUSED) {
                 resumeGame();
+            } else if (screenState == ScreenState.LEVEL_SELECT) {
+                backToMainMenu();
             }
         }
     }
@@ -322,6 +349,7 @@ public final class ClientApp {
 
     private void startGame() {
         userSystem.clearSave();
+        levelCompletionMarked = false;
         createGameLevel(selectedLevelId);
         gameLevel.startLevel();
         resumeGame();
@@ -357,6 +385,23 @@ public final class ClientApp {
         activeScreen = registerScreen;
     }
 
+    private void openLevelSelect() {
+        if (choseLevelScreen == null) {
+            choseLevelScreen = new ChoseLevelScreen(
+                    this::selectLevel,
+                    this::backToMainMenu,
+                    userSystem::isLevelCompleted);
+        }
+        choseLevelScreen.resetInit();
+        screenState = ScreenState.LEVEL_SELECT;
+        activeScreen = null;
+    }
+
+    private void backToMainMenu() {
+        screenState = ScreenState.MAIN_MENU;
+        activeScreen = mainMenuScreen;
+    }
+
     private void backToAuthMenu() {
         screenState = ScreenState.AUTH;
         activeScreen = authMenuScreen;
@@ -369,7 +414,7 @@ public final class ClientApp {
                     this::continueGame,
                     this::backToLogin,
                     this::PKGame,
-                    this::selectLevel,
+                    this::openLevelSelect,
                     this::selectedLevelLabel);
             pauseMenuScreen = new PauseMenuScreen(
                     this::saveGame,
@@ -519,9 +564,14 @@ public final class ClientApp {
 
     private String selectedLevelLabel() {
         return switch (selectedLevelId) {
+            case "simple" -> "简单";
             case "hard" -> "困难";
             case "preset" -> "预设";
-            default -> "简单";
+            case "bridge" -> "桥梁";
+            case "cell" -> "细胞";
+            case "island" -> "岛屿";
+            case "foolish" -> "愚者";
+            default -> selectedLevelId;
         };
     }
 
