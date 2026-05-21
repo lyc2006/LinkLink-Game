@@ -178,6 +178,26 @@ public class UserSystem {
         return currentUser.isLevelCompleted(levelId);
     }
 
+    public void updateHighestScore(int score) {
+        if (currentUser == null || currentUser.isGuest()) {
+            return;
+        }
+        if (score > currentUser.getHighestScore()) {
+            currentUser.setHighestScore(score);
+            users.put(currentUser.getUsername(), currentUser);
+            persist();
+            LOGGER.info("New highest score for {}: {}", currentUser.getUsername(), score);
+        }
+    }
+
+    public java.util.List<User> getTopRanking(int limit) {
+        return users.values().stream()
+                .filter(u -> !u.isGuest())
+                .sorted((a, b) -> Integer.compare(b.getHighestScore(), a.getHighestScore()))
+                .limit(limit)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     public boolean isLoadCorrupted() {
         return loadCorrupted;
     }

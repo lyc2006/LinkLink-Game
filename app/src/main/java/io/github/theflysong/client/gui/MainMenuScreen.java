@@ -18,7 +18,7 @@ public final class MainMenuScreen extends GuiScreen {
     private final Runnable onStart;
     private final Runnable onContinue;
     private final Runnable onBackLogin;
-    private final Runnable onPK;
+    private final Runnable onRanking;
     private final Runnable onSelectLevel;
     private final Supplier<String> selectedLevelLabelSupplier;
 
@@ -30,13 +30,13 @@ public final class MainMenuScreen extends GuiScreen {
     public MainMenuScreen(@NonNull Runnable onStart,
                           @NonNull Runnable onContinue,
                           @NonNull Runnable onBackLogin,
-                          @NonNull Runnable onPK,
+                          @NonNull Runnable onRanking,
                           @NonNull Runnable onSelectLevel,
                           @NonNull Supplier<String> selectedLevelLabelSupplier) {
         this.onStart = onStart;
         this.onContinue = onContinue;
         this.onBackLogin = onBackLogin;
-        this.onPK = onPK;
+        this.onRanking = onRanking;
         this.onSelectLevel = onSelectLevel;
         this.selectedLevelLabelSupplier = selectedLevelLabelSupplier;
     }
@@ -55,7 +55,10 @@ public final class MainMenuScreen extends GuiScreen {
         addComponent(createMenuButton("开始游戏", -140.0f, () -> onStart.run()));
         continueButton = addComponent(createMenuButton("继续游戏", -60.0f, () -> onContinue.run()));
         addComponent(createMenuButton("关卡选择", 20.0f, () -> onSelectLevel.run()));
-        addComponent(createMenuButton("对战模式", 100.0f, () -> onPK.run()));
+        addComponent(createMenuButton("排行榜", 100.0f, () -> onRanking
+        
+        
+        .run()));
         addComponent(createMenuButton("返回登录", 180.0f, () -> onBackLogin.run()));
 
         userStatusText = addComponent(new GuiTextComponent(

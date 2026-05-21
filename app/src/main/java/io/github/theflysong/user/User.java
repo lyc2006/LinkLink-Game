@@ -20,6 +20,7 @@ public class User {
     private String passwordHash;
     private int uid;
     private int score;
+    private int highestScore;
     private boolean isGuest;
     private GameMap gameMap;
     private String savedLevelId;
@@ -120,6 +121,15 @@ public class User {
     public void setScore(int score) {
         this.score = score;
     }
+
+    public int getHighestScore() {
+        return highestScore;
+    }
+
+    public void setHighestScore(int highestScore) {
+        this.highestScore = highestScore;
+    }
+
     public static void setUidCounter(int value) {
         Uid = value;
     }
@@ -153,6 +163,7 @@ public class User {
         obj.addProperty("passwordHash", passwordHash != null ? passwordHash : "");
         obj.addProperty("uid", uid);
         obj.addProperty("score", score);
+        obj.addProperty("highestScore", highestScore);
         obj.addProperty("isGuest", isGuest);
         obj.addProperty("savedLevelId", savedLevelId != null ? savedLevelId : "");
         obj.addProperty("savedEnergy", savedEnergy);
@@ -177,6 +188,9 @@ public class User {
         user.setPasswordHash(passwordHash);
         user.setUid(obj.get("uid").getAsInt());
         user.setScore(obj.get("score").getAsInt());
+        if (obj.has("highestScore")) {
+            user.setHighestScore(obj.get("highestScore").getAsInt());
+        }
         if (obj.has("savedLevelId")) {
             user.setSavedLevelId(obj.get("savedLevelId").getAsString());
         }

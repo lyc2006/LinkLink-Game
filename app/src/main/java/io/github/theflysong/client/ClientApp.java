@@ -21,6 +21,7 @@ import io.github.theflysong.client.gui.RegisterScreen;
 import io.github.theflysong.client.gui.LevelScreen;
 import io.github.theflysong.client.gui.MainMenuScreen;
 import io.github.theflysong.client.gui.PauseMenuScreen;
+import io.github.theflysong.client.gui.RankingList;
 import io.github.theflysong.client.render.GemRenderer;
 import io.github.theflysong.client.render.LevelRenderer;
 import io.github.theflysong.client.render.MapRenderer;
@@ -55,7 +56,8 @@ public final class ClientApp {
         PLAYING,
         PAUSED,
         AUTH,
-        LEVEL_SELECT
+        LEVEL_SELECT,
+        RANKING
     }
 
     @NonNull
@@ -73,13 +75,14 @@ public final class ClientApp {
     private @Nullable LoginScreen loginScreen;
     private @Nullable RegisterScreen registerScreen;
     private @Nullable ChoseLevelScreen choseLevelScreen;
+    private @Nullable RankingList rankingList;
     private boolean levelCompletionMarked;
     private @Nullable GLGpuMesh atlasDebugMesh;
     private final InputDispatcher inputDispatcher = new InputDispatcher();
     private final GameMapInputHandler gameMapInputHandler = new GameMapInputHandler(() -> gameLevel, mapRenderer);
     private UserSystem userSystem;
     private ScreenState screenState = ScreenState.MAIN_MENU;
-    private String selectedLevelId = "preset";
+    private String selectedLevelId = "simple ";
 
     public void run() {
         LOGGER.info("Creating window: {}x{}, title={}", (int) WINDOW_WIDTH, (int) WINDOW_HEIGHT, WINDOW_TITLE);
@@ -155,12 +158,17 @@ public final class ClientApp {
             if (choseLevelScreen != null) {
                 levelRenderer.renderScreen(choseLevelScreen);
             }
+        } else if (screenState == ScreenState.RANKING) {
+            if (rankingList != null) {
+                levelRenderer.renderScreen(rankingList);
+            }
         }
 
         if (screenState == ScreenState.PLAYING && gameLevel != null && gameLevel.isGameOver() && !levelCompletionMarked) {
             levelCompletionMarked = true;
             if (!userSystem.isGuest()) {
                 userSystem.markLevelCompleted(selectedLevelId);
+                userSystem.updateHighestScore(gameLevel.score());
             }
         }
     }
@@ -219,6 +227,10 @@ public final class ClientApp {
             choseLevelScreen.close();
             choseLevelScreen = null;
         }
+        if (rankingList != null) {
+            rankingList.close();
+            rankingList = null;
+        }
         if (levelScreen != null) {
             levelScreen.close();
             levelScreen = null;
@@ -275,6 +287,9 @@ public final class ClientApp {
         }
         if (choseLevelScreen != null) {
             choseLevelScreen.refreshLayout(screenSpace);
+        }
+        if (rankingList != null) {
+            rankingList.refreshLayout(screenSpace);
         }
     }
 
@@ -334,6 +349,8 @@ public final class ClientApp {
             } else if (screenState == ScreenState.PAUSED) {
                 resumeGame();
             } else if (screenState == ScreenState.LEVEL_SELECT) {
+                backToMainMenu();
+            } else if (screenState == ScreenState.RANKING) {
                 backToMainMenu();
             }
         }
@@ -413,7 +430,7 @@ public final class ClientApp {
                     this::startGame,
                     this::continueGame,
                     this::backToLogin,
-                    this::PKGame,
+                    this::RankList,
                     this::openLevelSelect,
                     this::selectedLevelLabel);
             pauseMenuScreen = new PauseMenuScreen(
@@ -442,9 +459,15 @@ public final class ClientApp {
         }
     }
 
-    private void PKGame() {
-        //TODO Auto-generated method stub
+    private void RankList() {
+        if (rankingList == null) {
+            rankingList = new RankingList(this::backToMainMenu);
         }
+        rankingList.setRankingData(userSystem.getTopRanking(10));
+        rankingList.resetInit();
+        screenState = ScreenState.RANKING;
+        activeScreen = rankingList;
+    }
 
     private void continueGame() {
         if (screenState == ScreenState.PAUSED) {
